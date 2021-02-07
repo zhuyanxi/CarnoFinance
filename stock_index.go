@@ -17,6 +17,19 @@ type StockIndex struct {
 	Name    string
 	EngName string
 
-	ConstituentCode string
-	ConstituentName string
+	Stocks []Stock
+}
+
+type StockIndexScraper struct {
+	URL       string
+	ExcelPath string
+}
+
+func (s *StockIndexScraper) Download() error {
+	err := DownloadExcel(s.URL, s.ExcelPath)
+	return err
+}
+
+func (s *StockIndexScraper) Read() StockIndex {
+	return StockIndex{}
 }

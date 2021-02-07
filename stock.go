@@ -1,7 +1,7 @@
 package main
 
-// StockBaseInfo :
-type StockBaseInfo struct {
+// Stock :
+type Stock struct {
 	Name     string `json:"name,omitempty"`
 	Code     string `json:"code,omitempty"`
 	Exchange string `json:"exchange,omit"`
