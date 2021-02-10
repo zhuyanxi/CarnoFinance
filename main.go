@@ -24,9 +24,26 @@ func main() {
 	// 		fmt.Println(span)
 	// 	})
 	// })
+
+	doGrowthIndex()
+	doValueIndex()
+}
+
+func doGrowthIndex() {
 	path, _ := os.Getwd()
 	filepath := filepath.Join(path, CSI_300_GROWTH_INDEX_EXCEL)
 	growthScraper := NewStockIndexScraper(CSI_300_GROWTH_INDEX_URL, filepath)
+	err := growthScraper.Download()
+	if err != nil {
+		panic(err)
+	}
+	growthScraper.Read()
+}
+
+func doValueIndex() {
+	path, _ := os.Getwd()
+	filepath := filepath.Join(path, CSI_300_VALUE_INDEX_EXCEL)
+	growthScraper := NewStockIndexScraper(CSI_300_VALUE_INDEX_URL, filepath)
 	err := growthScraper.Download()
 	if err != nil {
 		panic(err)
