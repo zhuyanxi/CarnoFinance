@@ -2,27 +2,24 @@ package main
 
 import (
 	"encoding/csv"
-	"fmt"
 	"io/ioutil"
 	"strings"
 )
 
 type IndexData struct {
-	Date       string
-	Open       string
-	High       string
-	Low        string
-	Close      string
-	Increase   string
-	Change     string //  e.g.: 0.1%
-	Volume     string
-	VolumeYang string
+	Date   string
+	Open   string
+	High   string
+	Low    string
+	Close  string
+	Change string //  e.g.: 0.1%
+	Volume string
 }
 
-func GetHS300() []IndexData {
+func GetIndexData(file string) []IndexData {
 	ret := []IndexData{}
 
-	f, err := ioutil.ReadFile("HS300.csv")
+	f, err := ioutil.ReadFile(file)
 	if err != nil {
 		return ret
 	}
@@ -31,7 +28,6 @@ func GetHS300() []IndexData {
 	if err != nil {
 		return ret
 	}
-	fmt.Println("HS300 rows:", len(hs300Data))
 
 	curRow := 1
 	for _, line := range hs300Data {
@@ -41,14 +37,12 @@ func GetHS300() []IndexData {
 		}
 		var d IndexData
 		d.Date = line[0]
-		d.Open = line[6]
-		d.High = line[4]
-		d.Low = line[5]
-		d.Close = line[3]
-		d.Increase = line[8]
-		d.Change = line[9]
-		d.Volume = line[10]
-		d.VolumeYang = line[11]
+		d.Close = line[1]
+		d.Open = line[2]
+		d.High = line[3]
+		d.Low = line[4]
+		d.Volume = line[5]
+		d.Change = line[6]
 
 		ret = append(ret, d)
 	}
