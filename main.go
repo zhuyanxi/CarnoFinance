@@ -5,21 +5,19 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"sort"
 
 	"github.com/PuerkitoBio/goquery"
+	"gonum.org/v1/plot/plotter"
 )
 
 func main() {
-	hs300 := GetIndexData("沪深300指数历史数据.csv")
-	cyb100 := GetIndexData("创业板指数历史数据.csv")
+	points := make(map[string]plotter.XYs)
+	points["First"] = PlotRandomPoints(15)
+	PlotLine("test", "X", "Y", "random.png", points)
 
-	sort.Slice(hs300, func(i, j int) bool {
-		return hs300[i].Date < hs300[j].Date
-	})
-	sort.Slice(cyb100, func(i, j int) bool {
-		return cyb100[i].Date < cyb100[j].Date
-	})
+	indexes := make(map[string]plotter.XYs)
+	indexes["HS300"] = PlotPoints(HS300ClosePoints())
+	PlotLine("indexes", "date", "point", "index-trend.png", indexes)
 
 	// doGrowthIndex()
 	// doValueIndex()
