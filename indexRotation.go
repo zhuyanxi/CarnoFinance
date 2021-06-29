@@ -79,3 +79,5 @@ func HS300ClosePoints() ([]float64, []float64) {
 
 	return dataX, dataY
 }
+
+const OriginMoney = 1000000
