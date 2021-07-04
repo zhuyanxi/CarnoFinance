@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -34,4 +36,11 @@ func StringToFloat64(price string) float64 {
 		return h
 	}
 	return 0
+}
+
+func ExitIfErr(err error) {
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }

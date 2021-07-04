@@ -5,22 +5,88 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"gonum.org/v1/plot/plotter"
 )
 
 func main() {
-	points := make(map[string]plotter.XYs)
-	points["First"] = PlotRandomPoints(15)
-	PlotLine("test", "X", "Y", "random.png", points)
+	//begin should after 2010-06-02, end should before 2021-06-28
+	begin, err := time.Parse("2006-01-02", "2013-12-31")
+	ExitIfErr(err)
+	end, err := time.Parse("2006-01-02", "2016-01-01")
+	ExitIfErr(err)
 
-	indexes := make(map[string]plotter.XYs)
-	indexes["HS300"] = PlotPoints(HS300ClosePoints())
-	PlotLine("indexes", "date", "point", "index-trend.png", indexes)
+	doHS300AndCYB100(begin, end)
+	// doHS300AndZZ500(begin, end)
+}
 
-	// doGrowthIndex()
-	// doValueIndex()
+func doHS300AndCYB100(begin, end time.Time) {
+	hs300Inc := CalcInc(GetHS300IndexData(), begin, end)
+	cyb100Inc := CalcInc(GetCYB100IndexData(), begin, end)
+	fmt.Println("hs300 inc: ", hs300Inc)
+	fmt.Println("cyb inc: ", cyb100Inc)
+
+	hs300Inc = CalcProfit(GetHS300IndexData(), begin, end)
+	cyb100Inc = CalcProfit(GetCYB100IndexData(), begin, end)
+	fmt.Println("hs300 profit: ", hs300Inc)
+	fmt.Println("cyb profit: ", cyb100Inc)
+
+	fmt.Println()
+	fmt.Println("============================策略开始===============================================")
+	fmt.Println()
+	index1, index2 := InitData(begin, end, GetHS300IndexData(), GetCYB100IndexData())
+
+	holdShare := Calc2(index1, index2, 20)
+	fmt.Printf("%+v", holdShare)
+	totolMoney := holdShare.HoldMoney + holdShare.Cash
+	fmt.Printf("Total Money:%f\n", totolMoney)
+	fmt.Printf("Profit:%f\n", 100*(totolMoney-OriginMoney)/OriginMoney)
+
+	fmt.Println()
+	fmt.Println("============================策略的分界线===============================================")
+	fmt.Println()
+
+	holdShare = Calc3(index1, index2, 20)
+	fmt.Printf("%+v", holdShare)
+	totolMoney = holdShare.HoldMoney + holdShare.Cash
+	fmt.Printf("Total Money:%f\n", totolMoney)
+	fmt.Printf("Profit:%f\n", 100*(totolMoney-OriginMoney)/OriginMoney)
+
+}
+
+func doHS300AndZZ500(begin, end time.Time) {
+	hs300Inc := CalcInc(GetHS300IndexData(), begin, end)
+	cyb100Inc := CalcInc(GetZZ500IndexData(), begin, end)
+	fmt.Println("hs300 inc: ", hs300Inc)
+	fmt.Println("zz500 inc: ", cyb100Inc)
+
+	hs300Inc = CalcProfit(GetHS300IndexData(), begin, end)
+	cyb100Inc = CalcProfit(GetZZ500IndexData(), begin, end)
+	fmt.Println("hs300 profit: ", hs300Inc)
+	fmt.Println("zz500 profit: ", cyb100Inc)
+
+	fmt.Println()
+	fmt.Println("============================策略开始===============================================")
+	fmt.Println()
+	index1, index2 := InitData(begin, end, GetHS300IndexData(), GetZZ500IndexData())
+
+	holdShare := Calc2(index1, index2, 20)
+	fmt.Printf("%+v", holdShare)
+	totolMoney := holdShare.HoldMoney + holdShare.Cash
+	fmt.Printf("Total Money:%f\n", totolMoney)
+	fmt.Printf("Profit:%f\n", 100*(totolMoney-OriginMoney)/OriginMoney)
+
+	fmt.Println()
+	fmt.Println("============================策略的分界线===============================================")
+	fmt.Println()
+
+	holdShare = Calc3(index1, index2, 20)
+	fmt.Printf("%+v", holdShare)
+	totolMoney = holdShare.HoldMoney + holdShare.Cash
+	fmt.Printf("Total Money:%f\n", totolMoney)
+	fmt.Printf("Profit:%f\n", 100*(totolMoney-OriginMoney)/OriginMoney)
+
 }
 
 func doGrowthIndex() {
