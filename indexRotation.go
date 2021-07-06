@@ -223,9 +223,10 @@ type Share struct {
 	HoldMoney float64 //持有金额
 	Cash      float64 // 现金
 
-	MaxHoldMoney float64 //最大持仓市值
-	MaxMoney     float64 //最大金额
-	MaxRe        float64 //最大回撤
+	CurProfitRatio float64 //当前收益百分比
+	MaxHoldMoney   float64 //最大持仓市值
+	MaxMoney       float64 //最大金额
+	MaxRe          float64 //最大回撤
 }
 
 // 计算前n(20,30,60等等)日(交易日)两个指数,谁的涨幅大，第一次当天以开盘价买入谁，之后以开盘价保持或换仓涨幅大的
@@ -245,6 +246,7 @@ func Calc2(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 	holdShare.HoldHand = 0
 	holdShare.HoldMoney = 0
 	holdShare.Cash = OriginMoney
+	holdShare.CurProfitRatio = 0
 	holdShare.MaxHoldMoney = 0
 	holdShare.MaxMoney = OriginMoney
 	holdShare.MaxRe = 0
@@ -310,6 +312,12 @@ func Calc2(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 				fmt.Println("Change hold from index1 to index2 date:", orderedIndex1[i].Date)
 				changeCount++
 			}
+		}
+
+		totolMoney := holdShare.HoldMoney + holdShare.Cash
+		holdShare.CurProfitRatio = 100 * (totolMoney - OriginMoney) / OriginMoney
+		if holdShare.CurProfitRatio < 0 && holdShare.CurProfitRatio < holdShare.MaxRe {
+			holdShare.MaxRe = holdShare.CurProfitRatio
 		}
 	}
 	fmt.Println("change count:", changeCount)
