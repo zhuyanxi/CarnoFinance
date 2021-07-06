@@ -12,13 +12,13 @@ import (
 
 func main() {
 	//begin should after 2010-06-02, end should before 2021-06-28
-	begin, err := time.Parse("2006-01-02", "2013-12-31")
+	begin, err := time.Parse("2006-01-02", "2011-01-01")
 	ExitIfErr(err)
-	end, err := time.Parse("2006-01-02", "2016-01-01")
+	end, err := time.Parse("2006-01-02", "2015-01-01")
 	ExitIfErr(err)
-
 	doHS300AndCYB100(begin, end)
 	// doHS300AndZZ500(begin, end)
+
 }
 
 func doHS300AndCYB100(begin, end time.Time) {
