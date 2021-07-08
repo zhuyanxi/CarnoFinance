@@ -12,15 +12,9 @@ import (
 
 func main() {
 	//begin should after 2010-06-02, end should before 2021-06-28
-<<<<<<< Updated upstream
-	begin, err := time.Parse("2006-01-02", "2011-01-01")
+	begin, err := time.Parse("2006-01-02", "2016-01-01")
 	ExitIfErr(err)
-	end, err := time.Parse("2006-01-02", "2015-01-01")
-=======
-	begin, err := time.Parse("2006-01-02", "2015-09-01")
-	ExitIfErr(err)
-	end, err := time.Parse("2006-01-02", "2021-06-01")
->>>>>>> Stashed changes
+	end, err := time.Parse("2006-01-02", "2021-06-15")
 	ExitIfErr(err)
 	doHS300AndCYB100(begin, end)
 	// doHS300AndZZ500(begin, end)
@@ -43,21 +37,23 @@ func doHS300AndCYB100(begin, end time.Time) {
 	fmt.Println()
 	index1, index2 := InitData(begin, end, GetHS300IndexData(), GetCYB100IndexData())
 
-	holdShare := Calc2(index1, index2, 20)
-	fmt.Printf("%+v", holdShare)
-	totolMoney := holdShare.HoldMoney + holdShare.Cash
-	fmt.Printf("Total Money:%f\n", totolMoney)
-	fmt.Printf("Profit:%f\n", 100*(totolMoney-OriginMoney)/OriginMoney)
+	var holdShare *Share
+	var totalMoney float64
+	// holdShare = Calc2(index1, index2, 20)
+	// fmt.Printf("%+v", holdShare)
+	// totalMoney := holdShare.HoldMoney + holdShare.Cash
+	// fmt.Printf("Total Money:%f\n", totalMoney)
+	// fmt.Printf("Profit:%f\n", 100*(totalMoney-OriginMoney)/OriginMoney)
 
 	fmt.Println()
 	fmt.Println("============================策略的分界线===============================================")
 	fmt.Println()
 
-	holdShare = Calc3(index1, index2, 20)
+	holdShare = Calc4(index1, index2, 20)
 	fmt.Printf("%+v", holdShare)
-	totolMoney = holdShare.HoldMoney + holdShare.Cash
-	fmt.Printf("Total Money:%f\n", totolMoney)
-	fmt.Printf("Profit:%f\n", 100*(totolMoney-OriginMoney)/OriginMoney)
+	totalMoney = holdShare.HoldMoney + holdShare.Cash
+	fmt.Printf("Total Money:%f\n", totalMoney)
+	fmt.Printf("Profit:%f\n", 100*(totalMoney-OriginMoney)/OriginMoney)
 
 }
 
