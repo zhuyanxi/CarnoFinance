@@ -546,24 +546,21 @@ func Calc4(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 			}
 		}
 
-		curMoney = append(curMoney, holdShare.HoldMoney+holdShare.Cash)
+		switch holdShare.HoldType {
+		case 0:
+			curMoney = append(curMoney, holdShare.Cash)
+		case 1:
+			closePrice := orderedIndex1[i].Close
+			curMoney = append(curMoney, float64(holdShare.HoldHand)*closePrice+holdShare.Cash)
+		case 2:
+			closePrice := orderedIndex2[i].Close
+			curMoney = append(curMoney, float64(holdShare.HoldHand)*closePrice+holdShare.Cash)
+		}
+		fmt.Printf("curMoney: %f | date: %s | ", curMoney[len(curMoney)-1], orderedIndex1[i].DateString)
+		CalcMaxRe(curMoney)
 	}
 	fmt.Println("change count:", changeCount)
-	var top float64
-	var maxRet float64
-	top = 0
-	maxRet = 0
-	for i := 1; i < len(curMoney); i++ {
-		if curMoney[i-1] < curMoney[i] {
-			top = curMoney[i]
-		} else if curMoney[i-1] > curMoney[i] {
-			tmpRet := (curMoney[i] - top) / curMoney[i]
-			if tmpRet < maxRet {
-				maxRet = tmpRet
-			}
-		}
-	}
-	fmt.Println("max ret:", maxRet)
+	CalcMaxRe(curMoney)
 
 	if holdShare.HoldType != 0 {
 		var closePrice float64
@@ -610,40 +607,53 @@ func Calc5(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 
 		switch holdShare.HoldType {
 		case 0:
-			var buyPrice float64
-			var holdType int
-			if inc20Idx1 >= inc20Idx2 {
-				buyPrice = orderedIndex1[i].Open
-				holdType = 1
-				fmt.Println("Buy hold index1 date:", orderedIndex1[i].Date)
-			} else {
-				buyPrice = orderedIndex2[i].Open
-				holdType = 2
-				fmt.Println("Buy hold index2 date:", orderedIndex2[i].Date)
+			if inc20Idx1 >= 0 && inc20Idx2 >= 0 {
+				var buyPrice float64
+				var holdType int
+				if inc20Idx1 >= inc20Idx2 {
+					buyPrice = orderedIndex1[i].Open
+					holdType = 1
+					fmt.Println("Buy hold index1 date:", orderedIndex1[i].Date)
+				} else {
+					buyPrice = orderedIndex2[i].Open
+					holdType = 2
+					fmt.Println("Buy hold index2 date:", orderedIndex2[i].Date)
+				}
+				holdF := holdShare.Cash / buyPrice
+				holdHand := int(math.Floor(holdF))
+				holdShare.HoldType = holdType
+				holdShare.HoldHand = holdHand
+				holdShare.HoldMoney = float64(holdHand) * buyPrice
+				holdShare.Cash = holdShare.Cash - holdShare.HoldMoney
 			}
-			holdF := holdShare.Cash / buyPrice
-			holdHand := int(math.Floor(holdF))
-			holdShare.HoldType = holdType
-			holdShare.HoldHand = holdHand
-			holdShare.HoldMoney = float64(holdHand) * buyPrice
-			holdShare.Cash = holdShare.Cash - holdShare.HoldMoney
 		case 1:
-			if inc20Idx1 < inc20Idx2 {
+			if inc20Idx1 < 0 && inc20Idx2 < 0 {
 				sellPrice := orderedIndex1[i-1].Close
 				sellMoney := sellPrice * float64(holdShare.HoldHand)
 				totalMoney := sellMoney + holdShare.Cash
 
-				buyPrice := orderedIndex2[i].Open
-				holdF := totalMoney / buyPrice
-				holdHand := int(math.Floor(holdF))
-				holdShare.HoldType = 2
-				holdShare.HoldHand = holdHand
-				holdShare.HoldMoney = float64(holdHand) * buyPrice
-				holdShare.Cash = totalMoney - holdShare.HoldMoney
+				holdShare.HoldHand = 0
+				holdShare.HoldType = 0
+				holdShare.HoldMoney = 0
+				holdShare.Cash = totalMoney
+			} else {
+				if inc20Idx1 < inc20Idx2 {
+					sellPrice := orderedIndex1[i-1].Close
+					sellMoney := sellPrice * float64(holdShare.HoldHand)
+					totalMoney := sellMoney + holdShare.Cash
 
-				totolMoney := holdShare.HoldMoney + holdShare.Cash
-				fmt.Println("Change hold from index1 to index2 date:", orderedIndex1[i].Date, " | Cur Profit: ", 100*(totolMoney-OriginMoney)/OriginMoney)
-				changeCount++
+					buyPrice := orderedIndex2[i].Open
+					holdF := totalMoney / buyPrice
+					holdHand := int(math.Floor(holdF))
+					holdShare.HoldType = 2
+					holdShare.HoldHand = holdHand
+					holdShare.HoldMoney = float64(holdHand) * buyPrice
+					holdShare.Cash = totalMoney - holdShare.HoldMoney
+
+					totolMoney := holdShare.HoldMoney + holdShare.Cash
+					fmt.Println("Change hold from index1 to index2 date:", orderedIndex1[i].Date, " | Cur Profit: ", 100*(totolMoney-OriginMoney)/OriginMoney)
+					changeCount++
+				}
 			}
 		case 2:
 			if inc20Idx1 > inc20Idx2 {

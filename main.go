@@ -12,7 +12,7 @@ import (
 
 func main() {
 	//begin should after 2010-06-02, end should before 2021-06-28
-	begin, err := time.Parse("2006-01-02", "2016-01-01")
+	begin, err := time.Parse("2006-01-02", "2016-10-01")
 	ExitIfErr(err)
 	end, err := time.Parse("2006-01-02", "2021-06-15")
 	ExitIfErr(err)
