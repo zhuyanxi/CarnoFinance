@@ -636,6 +636,8 @@ func Calc5(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 				holdShare.HoldType = 0
 				holdShare.HoldMoney = 0
 				holdShare.Cash = totalMoney
+				fmt.Println("Sell hold from index1 date:", orderedIndex1[i].Date)
+
 			} else {
 				if inc20Idx1 < inc20Idx2 {
 					sellPrice := orderedIndex1[i-1].Close
