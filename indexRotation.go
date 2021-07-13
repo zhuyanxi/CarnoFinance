@@ -76,6 +76,10 @@ func GetZZ500IndexData() []IndexData {
 	return GetIndexData("中证500指数历史数据.csv")
 }
 
+func GetSZ50IndexData() []IndexData {
+	return GetIndexData("上证50指数历史数据.csv")
+}
+
 func HS300ClosePoints() ([]float64, []float64) {
 
 	hs300Data := GetHS300IndexData()
@@ -139,7 +143,28 @@ func InitData(begin, end time.Time, org1, org2 []IndexData) (orderedIdx1, ordere
 	len1 := len(orderedIdx1)
 	len2 := len(orderedIdx2)
 	if len1 != len2 {
-		fmt.Printf("len1=%d not equal to len2=%d", len1, len2)
+		fmt.Printf("len1=%d not equal to len2=%d\n", len1, len2)
+		if len1 < len2 {
+			dsMap := make(map[string]struct{})
+			for _, v := range orderedIdx1 {
+				dsMap[v.DateString] = struct{}{}
+			}
+			for _, v := range orderedIdx2 {
+				if _, ok := dsMap[v.DateString]; !ok {
+					fmt.Println("date ", v.DateString, " in idx2 not in idx1")
+				}
+			}
+		} else {
+			dsMap := make(map[string]struct{})
+			for _, v := range orderedIdx2 {
+				dsMap[v.DateString] = struct{}{}
+			}
+			for _, v := range orderedIdx1 {
+				if _, ok := dsMap[v.DateString]; !ok {
+					fmt.Println("date ", v.DateString, " in idx1 not in idx2")
+				}
+			}
+		}
 		os.Exit(1)
 	}
 	if len1 < 21 {

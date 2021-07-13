@@ -12,13 +12,13 @@ import (
 
 func main() {
 	//begin should after 2010-06-02, end should before 2021-06-28
-	begin, err := time.Parse("2006-01-02", "2016-10-01")
+	begin, err := time.Parse("2006-01-02", "2015-06-05")
 	ExitIfErr(err)
-	end, err := time.Parse("2006-01-02", "2021-06-15")
+	end, err := time.Parse("2006-01-02", "2021-06-25")
 	ExitIfErr(err)
-	doHS300AndCYB100(begin, end)
+	// doHS300AndCYB100(begin, end)
 	// doHS300AndZZ500(begin, end)
-
+	doSZ50AndCYB100(begin, end)
 }
 
 func doHS300AndCYB100(begin, end time.Time) {
@@ -36,6 +36,42 @@ func doHS300AndCYB100(begin, end time.Time) {
 	fmt.Println("============================策略开始===============================================")
 	fmt.Println()
 	index1, index2 := InitData(begin, end, GetHS300IndexData(), GetCYB100IndexData())
+
+	var holdShare *Share
+	var totalMoney float64
+	// holdShare = Calc2(index1, index2, 20)
+	// fmt.Printf("%+v", holdShare)
+	// totalMoney := holdShare.HoldMoney + holdShare.Cash
+	// fmt.Printf("Total Money:%f\n", totalMoney)
+	// fmt.Printf("Profit:%f\n", 100*(totalMoney-OriginMoney)/OriginMoney)
+
+	fmt.Println()
+	fmt.Println("============================策略的分界线===============================================")
+	fmt.Println()
+
+	holdShare = Calc4(index1, index2, 20)
+	fmt.Printf("%+v", holdShare)
+	totalMoney = holdShare.HoldMoney + holdShare.Cash
+	fmt.Printf("Total Money:%f\n", totalMoney)
+	fmt.Printf("Profit:%f\n", 100*(totalMoney-OriginMoney)/OriginMoney)
+
+}
+
+func doSZ50AndCYB100(begin, end time.Time) {
+	sz50Inc := CalcInc(GetSZ50IndexData(), begin, end)
+	cyb100Inc := CalcInc(GetCYB100IndexData(), begin, end)
+	fmt.Println("hs300 inc: ", sz50Inc)
+	fmt.Println("cyb inc: ", cyb100Inc)
+
+	sz50Inc = CalcProfit(GetSZ50IndexData(), begin, end)
+	cyb100Inc = CalcProfit(GetCYB100IndexData(), begin, end)
+	fmt.Println("hs300 profit: ", sz50Inc)
+	fmt.Println("cyb profit: ", cyb100Inc)
+
+	fmt.Println()
+	fmt.Println("============================策略开始===============================================")
+	fmt.Println()
+	index1, index2 := InitData(begin, end, GetSZ50IndexData(), GetCYB100IndexData())
 
 	var holdShare *Share
 	var totalMoney float64
