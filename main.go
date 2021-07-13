@@ -21,7 +21,7 @@ func main() {
 	doSZ50AndCYB100(begin, end)
 }
 
-func doHS300AndCYB100(begin, end time.Time) {
+func doHS300AndCYB100(begin, end time.Time) (profit float64) {
 	hs300Inc := CalcInc(GetHS300IndexData(), begin, end)
 	cyb100Inc := CalcInc(GetCYB100IndexData(), begin, end)
 	fmt.Println("hs300 inc: ", hs300Inc)
@@ -53,11 +53,12 @@ func doHS300AndCYB100(begin, end time.Time) {
 	fmt.Printf("%+v", holdShare)
 	totalMoney = holdShare.HoldMoney + holdShare.Cash
 	fmt.Printf("Total Money:%f\n", totalMoney)
-	fmt.Printf("Profit:%f\n", 100*(totalMoney-OriginMoney)/OriginMoney)
-
+	profit = 100 * (totalMoney - OriginMoney) / OriginMoney
+	fmt.Printf("Profit:%f\n", profit)
+	return
 }
 
-func doSZ50AndCYB100(begin, end time.Time) {
+func doSZ50AndCYB100(begin, end time.Time) (profit float64) {
 	sz50Inc := CalcInc(GetSZ50IndexData(), begin, end)
 	cyb100Inc := CalcInc(GetCYB100IndexData(), begin, end)
 	fmt.Println("hs300 inc: ", sz50Inc)
@@ -89,8 +90,9 @@ func doSZ50AndCYB100(begin, end time.Time) {
 	fmt.Printf("%+v", holdShare)
 	totalMoney = holdShare.HoldMoney + holdShare.Cash
 	fmt.Printf("Total Money:%f\n", totalMoney)
-	fmt.Printf("Profit:%f\n", 100*(totalMoney-OriginMoney)/OriginMoney)
-
+	profit = 100 * (totalMoney - OriginMoney) / OriginMoney
+	fmt.Printf("Profit:%f\n", profit)
+	return
 }
 
 func doHS300AndZZ500(begin, end time.Time) {
