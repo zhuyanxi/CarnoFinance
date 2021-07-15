@@ -632,7 +632,7 @@ func Calc5(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 
 		switch holdShare.HoldType {
 		case 0:
-			if inc20Idx1 >= 0 && inc20Idx2 >= 0 {
+			if inc20Idx1 >= 0 || inc20Idx2 >= 0 {
 				var buyPrice float64
 				var holdType int
 				if inc20Idx1 >= inc20Idx2 {
