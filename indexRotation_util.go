@@ -10,9 +10,8 @@ type Share struct {
 	HoldMoney float64 //持有金额
 	Cash      float64 // 现金
 
-	CurProfitRatio float64 //当前收益百分比
-	MaxHoldMoney   float64 //最大持仓市值
-	MaxMoney       float64 //最大金额
+	// CurProfitRatio float64 //当前收益百分比
+	// MaxHoldMoney   float64 //最大持仓市值
 }
 
 func (s *Share) Buy(holdType int, price float64) {
