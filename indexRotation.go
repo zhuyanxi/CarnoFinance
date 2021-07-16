@@ -51,7 +51,7 @@ func GetIndexData(file string) []IndexData {
 		var d IndexData
 		d.Date, _ = time.Parse("2006年1月2日", line[0])
 		d.DateString = d.Date.Format("2006年01月02日")
-		// fmt.Println(d.Date)
+		// LogPrintln(d.Date)
 		d.Close = StringToFloat64(line[1])
 		d.Open = StringToFloat64(line[2])
 		d.High = StringToFloat64(line[3])
@@ -101,7 +101,7 @@ func HS300ClosePoints() ([]float64, []float64) {
 // begin should after 2010-06-02, end should before 2021-06-28
 func InitData(begin, end time.Time, org1, org2 []IndexData) (orderedIdx1, orderedIdx2 []IndexData) {
 	// if end.Sub(begin).Hours()/24 < 40 {
-	// 	fmt.Println("end time should bigger than begin time plus 40days")
+	// 	LogPrintln("end time should bigger than begin time plus 40days")
 	// 	os.Exit(1)
 	// }
 	minT, err := time.Parse("2006-01-02", "2010-06-02")
@@ -109,7 +109,7 @@ func InitData(begin, end time.Time, org1, org2 []IndexData) (orderedIdx1, ordere
 	maxT, err := time.Parse("2006-01-02", "2021-06-28")
 	ExitIfErr(err)
 	if begin.Before(minT) || end.After(maxT) {
-		fmt.Println("begin should after 2010-06-02, end should before 2021-06-28")
+		LogPrintln("begin should after 2010-06-02, end should before 2021-06-28")
 		os.Exit(1)
 	}
 
@@ -117,7 +117,7 @@ func InitData(begin, end time.Time, org1, org2 []IndexData) (orderedIdx1, ordere
 	orderedIdx2 = []IndexData{}
 
 	for _, val := range org1 {
-		// fmt.Println("begin:", begin, " | end:", end, " | curDay:", val.Date)
+		// LogPrintln("begin:", begin, " | end:", end, " | curDay:", val.Date)
 		if val.Date.After(begin) && val.Date.Before(end) {
 			orderedIdx1 = append(orderedIdx1, val)
 		}
@@ -151,7 +151,7 @@ func InitData(begin, end time.Time, org1, org2 []IndexData) (orderedIdx1, ordere
 			}
 			for _, v := range orderedIdx2 {
 				if _, ok := dsMap[v.DateString]; !ok {
-					fmt.Println("date ", v.DateString, " in idx2 not in idx1")
+					LogPrintln("date ", v.DateString, " in idx2 not in idx1")
 				}
 			}
 		} else {
@@ -161,14 +161,14 @@ func InitData(begin, end time.Time, org1, org2 []IndexData) (orderedIdx1, ordere
 			}
 			for _, v := range orderedIdx1 {
 				if _, ok := dsMap[v.DateString]; !ok {
-					fmt.Println("date ", v.DateString, " in idx1 not in idx2")
+					LogPrintln("date ", v.DateString, " in idx1 not in idx2")
 				}
 			}
 		}
 		os.Exit(1)
 	}
 	if len1 < 21 {
-		fmt.Println("exchange days should be larger than 20")
+		LogPrintln("exchange days should be larger than 20")
 		os.Exit(1)
 	}
 
@@ -212,7 +212,7 @@ func CalcProfit(idx []IndexData, begin, end time.Time) float64 {
 // 计算前20日(交易日)两个指数谁的涨幅大，判断当天是否前20日涨幅大的指数涨幅依然更大，返回是的天数和否的天数
 func Calc1(orderedIndex1, orderedIndex2 []IndexData) (int, int) {
 	if len(orderedIndex1) != len(orderedIndex2) {
-		fmt.Println("length not the same")
+		LogPrintln("length not the same")
 		return 0, 0
 	}
 
@@ -242,27 +242,15 @@ func Calc1(orderedIndex1, orderedIndex2 []IndexData) (int, int) {
 	return same, notSame
 }
 
-type Share struct {
-	HoldType  int     // 持有类型0, 1 or 2(其中0表示空仓)
-	HoldHand  int     // 持有手数
-	HoldMoney float64 //持有金额
-	Cash      float64 // 现金
-
-	CurProfitRatio float64 //当前收益百分比
-	MaxHoldMoney   float64 //最大持仓市值
-	MaxMoney       float64 //最大金额
-	MaxRe          float64 //最大回撤
-}
-
 // 计算前n(20,30,60等等)日(交易日)两个指数,谁的涨幅大，第一次当天以开盘价买入谁，之后以开盘价保持或换仓涨幅大的
 func Calc2(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 	if len(orderedIndex1) != len(orderedIndex2) {
-		fmt.Println("length not the same")
+		LogPrintln("length not the same")
 		os.Exit(1)
 	}
 	length := len(orderedIndex1)
 	if length <= n {
-		fmt.Println("length should bigger than n")
+		LogPrintln("length should bigger than n")
 		os.Exit(1)
 	}
 
@@ -274,7 +262,6 @@ func Calc2(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 	holdShare.CurProfitRatio = 0
 	holdShare.MaxHoldMoney = 0
 	holdShare.MaxMoney = OriginMoney
-	holdShare.MaxRe = 0
 
 	changeCount := 0
 
@@ -291,7 +278,7 @@ func Calc2(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 				holdShare.HoldHand = holdHand
 				holdShare.HoldMoney = float64(holdHand) * buyPrice
 				holdShare.Cash = holdShare.Cash - holdShare.HoldMoney
-				fmt.Println("Buy hold index1 date:", orderedIndex1[i].Date)
+				LogPrintln("Buy hold index1 date:", orderedIndex1[i].Date)
 			}
 			if holdShare.HoldType == 2 {
 				sellPrice := orderedIndex2[i-1].Close
@@ -306,7 +293,7 @@ func Calc2(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 				holdShare.HoldMoney = float64(holdHand) * buyPrice
 				holdShare.Cash = totalMoney - holdShare.HoldMoney
 
-				fmt.Println("Change hold from index2 to index1 date:", orderedIndex1[i].Date)
+				LogPrintln("Change hold from index2 to index1 date:", orderedIndex1[i].Date)
 				changeCount++
 			}
 		}
@@ -319,7 +306,7 @@ func Calc2(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 				holdShare.HoldHand = holdHand
 				holdShare.HoldMoney = float64(holdHand) * buyPrice
 				holdShare.Cash = holdShare.Cash - holdShare.HoldMoney
-				fmt.Println("Buy hold index2 date:", orderedIndex2[i].Date)
+				LogPrintln("Buy hold index2 date:", orderedIndex2[i].Date)
 			}
 			if holdShare.HoldType == 1 {
 				sellPrice := orderedIndex1[i-1].Close
@@ -334,18 +321,15 @@ func Calc2(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 				holdShare.HoldMoney = float64(holdHand) * buyPrice
 				holdShare.Cash = totalMoney - holdShare.HoldMoney
 
-				fmt.Println("Change hold from index1 to index2 date:", orderedIndex1[i].Date)
+				LogPrintln("Change hold from index1 to index2 date:", orderedIndex1[i].Date)
 				changeCount++
 			}
 		}
 
 		totolMoney := holdShare.HoldMoney + holdShare.Cash
 		holdShare.CurProfitRatio = 100 * (totolMoney - OriginMoney) / OriginMoney
-		if holdShare.CurProfitRatio < 0 && holdShare.CurProfitRatio < holdShare.MaxRe {
-			holdShare.MaxRe = holdShare.CurProfitRatio
-		}
 	}
-	fmt.Println("change count:", changeCount)
+	LogPrintln("change count:", changeCount)
 
 	var closePrice float64
 	if holdShare.HoldType == 1 {
@@ -362,12 +346,12 @@ func Calc2(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 // 若两个涨幅均小于0，则空仓
 func Calc3(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 	if len(orderedIndex1) != len(orderedIndex2) {
-		fmt.Println("length not the same")
+		LogPrintln("length not the same")
 		os.Exit(1)
 	}
 	length := len(orderedIndex1)
 	if length <= n {
-		fmt.Println("length should bigger than n")
+		LogPrintln("length should bigger than n")
 		os.Exit(1)
 	}
 
@@ -378,7 +362,6 @@ func Calc3(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 	holdShare.Cash = OriginMoney
 	holdShare.MaxHoldMoney = 0
 	holdShare.MaxMoney = OriginMoney
-	holdShare.MaxRe = 0
 
 	changeCount := 0
 
@@ -393,12 +376,12 @@ func Calc3(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 
 			var sellPrice float64
 			if holdShare.HoldType == 1 {
-				fmt.Println("Sell hold index1 date:", orderedIndex1[i].Date)
+				LogPrintln("Sell hold index1 date:", orderedIndex1[i].Date)
 				sellPrice = orderedIndex1[i-1].Close
 			}
 
 			if holdShare.HoldType == 2 {
-				fmt.Println("Sell hold index2 date:", orderedIndex1[i].Date)
+				LogPrintln("Sell hold index2 date:", orderedIndex1[i].Date)
 				sellPrice = orderedIndex2[i-1].Close
 			}
 
@@ -422,7 +405,7 @@ func Calc3(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 				holdShare.HoldHand = holdHand
 				holdShare.HoldMoney = float64(holdHand) * buyPrice
 				holdShare.Cash = holdShare.Cash - holdShare.HoldMoney
-				fmt.Println("Buy hold index1 date:", orderedIndex1[i].Date)
+				LogPrintln("Buy hold index1 date:", orderedIndex1[i].Date)
 			}
 			if holdShare.HoldType == 2 {
 				sellPrice := orderedIndex2[i-1].Close
@@ -437,7 +420,7 @@ func Calc3(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 				holdShare.HoldMoney = float64(holdHand) * buyPrice
 				holdShare.Cash = totalMoney - holdShare.HoldMoney
 
-				fmt.Println("Change hold from index2 to index1 date:", orderedIndex1[i].Date)
+				LogPrintln("Change hold from index2 to index1 date:", orderedIndex1[i].Date)
 				changeCount++
 			}
 		}
@@ -450,7 +433,7 @@ func Calc3(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 				holdShare.HoldHand = holdHand
 				holdShare.HoldMoney = float64(holdHand) * buyPrice
 				holdShare.Cash = holdShare.Cash - holdShare.HoldMoney
-				fmt.Println("Buy hold index2 date:", orderedIndex2[i].Date)
+				LogPrintln("Buy hold index2 date:", orderedIndex2[i].Date)
 			}
 			if holdShare.HoldType == 1 {
 				sellPrice := orderedIndex1[i-1].Close
@@ -465,12 +448,12 @@ func Calc3(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 				holdShare.HoldMoney = float64(holdHand) * buyPrice
 				holdShare.Cash = totalMoney - holdShare.HoldMoney
 
-				fmt.Println("Change hold from index1 to index2 date:", orderedIndex1[i].Date)
+				LogPrintln("Change hold from index1 to index2 date:", orderedIndex1[i].Date)
 				changeCount++
 			}
 		}
 	}
-	fmt.Println("change count:", changeCount)
+	LogPrintln("change count:", changeCount)
 
 	if holdShare.HoldType != 0 {
 		var closePrice float64
@@ -488,12 +471,12 @@ func Calc3(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 // 计算前n(20,30,60等等)日(交易日)两个指数,谁的涨幅大，第一次当天以开盘价买入谁，之后以开盘价保持或换仓涨幅大的
 func Calc4(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 	if len(orderedIndex1) != len(orderedIndex2) {
-		fmt.Println("length not the same")
+		LogPrintln("length not the same")
 		os.Exit(1)
 	}
 	length := len(orderedIndex1)
 	if length <= n {
-		fmt.Println("length should bigger than n")
+		LogPrintln("length should bigger than n")
 		os.Exit(1)
 	}
 
@@ -504,7 +487,6 @@ func Calc4(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 	holdShare.Cash = OriginMoney
 	holdShare.MaxHoldMoney = 0
 	holdShare.MaxMoney = OriginMoney
-	holdShare.MaxRe = 0
 
 	changeCount := 0
 
@@ -521,11 +503,11 @@ func Calc4(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 			if inc20Idx1 >= inc20Idx2 {
 				buyPrice = orderedIndex1[i].Open
 				holdType = 1
-				fmt.Println("Buy hold index1 date:", orderedIndex1[i].Date)
+				LogPrintln("Buy hold index1 date:", orderedIndex1[i].Date)
 			} else {
 				buyPrice = orderedIndex2[i].Open
 				holdType = 2
-				fmt.Println("Buy hold index2 date:", orderedIndex2[i].Date)
+				LogPrintln("Buy hold index2 date:", orderedIndex2[i].Date)
 			}
 			holdF := holdShare.Cash / buyPrice
 			holdHand := int(math.Floor(holdF))
@@ -548,7 +530,7 @@ func Calc4(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 				holdShare.Cash = totalMoney - holdShare.HoldMoney
 
 				totolMoney := holdShare.HoldMoney + holdShare.Cash
-				fmt.Println("Change hold from index1 to index2 date:", orderedIndex1[i].Date, " | Cur Profit: ", 100*(totolMoney-OriginMoney)/OriginMoney)
+				LogPrintln("Change hold from index1 to index2 date:", orderedIndex1[i].Date, " | Cur Profit: ", 100*(totolMoney-OriginMoney)/OriginMoney)
 				changeCount++
 			}
 		case 2:
@@ -566,7 +548,7 @@ func Calc4(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 				holdShare.Cash = totalMoney - holdShare.HoldMoney
 
 				totolMoney := holdShare.HoldMoney + holdShare.Cash
-				fmt.Println("Change hold from index2 to index1 date:", orderedIndex1[i].Date, " | Cur Profit: ", 100*(totolMoney-OriginMoney)/OriginMoney)
+				LogPrintln("Change hold from index2 to index1 date:", orderedIndex1[i].Date, " | Cur Profit: ", 100*(totolMoney-OriginMoney)/OriginMoney)
 				changeCount++
 			}
 		}
@@ -584,7 +566,7 @@ func Calc4(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 		fmt.Printf("curMoney: %f | date: %s | ", curMoney[len(curMoney)-1], orderedIndex1[i].DateString)
 		CalcMaxRe(curMoney)
 	}
-	fmt.Println("change count:", changeCount)
+	LogPrintln("change count:", changeCount)
 	CalcMaxRe(curMoney)
 
 	if holdShare.HoldType != 0 {
@@ -604,12 +586,12 @@ func Calc4(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 // 若两个涨幅均小于0，则空仓
 func Calc5(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 	if len(orderedIndex1) != len(orderedIndex2) {
-		fmt.Println("length not the same")
+		LogPrintln("length not the same")
 		os.Exit(1)
 	}
 	length := len(orderedIndex1)
 	if length <= n {
-		fmt.Println("length should bigger than n")
+		LogPrintln("length should bigger than n")
 		os.Exit(1)
 	}
 
@@ -620,7 +602,6 @@ func Calc5(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 	holdShare.Cash = OriginMoney
 	holdShare.MaxHoldMoney = 0
 	holdShare.MaxMoney = OriginMoney
-	holdShare.MaxRe = 0
 
 	changeCount := 0
 
@@ -638,11 +619,11 @@ func Calc5(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 				if inc20Idx1 >= inc20Idx2 {
 					buyPrice = orderedIndex1[i].Open
 					holdType = 1
-					fmt.Println("Buy hold index1 date:", orderedIndex1[i].Date)
+					LogPrintln("Buy hold index1 date:", orderedIndex1[i].Date)
 				} else {
 					buyPrice = orderedIndex2[i].Open
 					holdType = 2
-					fmt.Println("Buy hold index2 date:", orderedIndex2[i].Date)
+					LogPrintln("Buy hold index2 date:", orderedIndex2[i].Date)
 				}
 				holdF := holdShare.Cash / buyPrice
 				holdHand := int(math.Floor(holdF))
@@ -661,7 +642,7 @@ func Calc5(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 				holdShare.HoldType = 0
 				holdShare.HoldMoney = 0
 				holdShare.Cash = totalMoney
-				fmt.Println("Sell hold from index1 date:", orderedIndex1[i].Date)
+				LogPrintln("Sell hold from index1 date:", orderedIndex1[i].Date)
 
 			} else {
 				if inc20Idx1 < inc20Idx2 {
@@ -678,7 +659,7 @@ func Calc5(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 					holdShare.Cash = totalMoney - holdShare.HoldMoney
 
 					totolMoney := holdShare.HoldMoney + holdShare.Cash
-					fmt.Println("Change hold from index1 to index2 date:", orderedIndex1[i].Date, " | Cur Profit: ", 100*(totolMoney-OriginMoney)/OriginMoney)
+					LogPrintln("Change hold from index1 to index2 date:", orderedIndex1[i].Date, " | Cur Profit: ", 100*(totolMoney-OriginMoney)/OriginMoney)
 					changeCount++
 				}
 			}
@@ -697,14 +678,14 @@ func Calc5(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 				holdShare.Cash = totalMoney - holdShare.HoldMoney
 
 				totolMoney := holdShare.HoldMoney + holdShare.Cash
-				fmt.Println("Change hold from index2 to index1 date:", orderedIndex1[i].Date, " | Cur Profit: ", 100*(totolMoney-OriginMoney)/OriginMoney)
+				LogPrintln("Change hold from index2 to index1 date:", orderedIndex1[i].Date, " | Cur Profit: ", 100*(totolMoney-OriginMoney)/OriginMoney)
 				changeCount++
 			}
 		}
 
 		curMoney = append(curMoney, holdShare.HoldMoney+holdShare.Cash)
 	}
-	fmt.Println("change count:", changeCount)
+	LogPrintln("change count:", changeCount)
 	var top float64
 	var maxRet float64
 	top = curMoney[0]
@@ -722,7 +703,7 @@ func Calc5(orderedIndex1, orderedIndex2 []IndexData, n int) *Share {
 			}
 		}
 	}
-	fmt.Println("max ret:", maxRet)
+	LogPrintln("max ret:", maxRet)
 
 	if holdShare.HoldType != 0 {
 		var closePrice float64
