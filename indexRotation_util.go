@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 )
 
 type Share struct {
@@ -43,4 +44,73 @@ func CalcMaxRe(money []float64) {
 		}
 	}
 	fmt.Println("max ret:", maxRet)
+}
+
+func DoDayByDay(begin, end time.Time, calcFunc func(orderedIndex1, orderedIndex2 []IndexData, n int) *Share) {
+	beginDateExcludeWeekend := []time.Time{}
+	for {
+		begin = begin.Add(24 * time.Hour)
+		if begin.Add(40 * 24 * time.Hour).After(end) {
+			break
+		}
+		exludeTime1, err := time.Parse("2006-01-02", "2015-03-31")
+		ExitIfErr(err)
+		exludeTime2, err := time.Parse("2006-01-02", "2015-07-31")
+		ExitIfErr(err)
+		if begin.After(exludeTime1) && begin.Before(exludeTime2) {
+			fmt.Println(begin)
+			continue
+		}
+		if begin.Weekday() == time.Saturday || begin.Weekday() == time.Sunday {
+			continue
+		}
+		beginDateExcludeWeekend = append(beginDateExcludeWeekend, begin)
+	}
+
+	totalDays := len(beginDateExcludeWeekend)
+	type profitDay struct {
+		DD     time.Time
+		profit float64
+	}
+	lossArr := []profitDay{}
+	profitArr := []profitDay{}
+	for _, v := range beginDateExcludeWeekend {
+		fmt.Println(v)
+
+		// profit := doHS300AndCYB100(v, end)
+		endV := v.Add(2 * 365 * 24 * time.Hour)
+		if endV.After(end) {
+			endV = end
+		}
+		profit := doHS300AndCYB100(v, endV, calcFunc)
+		profitArr = append(profitArr, profitDay{
+			DD:     v,
+			profit: profit,
+		})
+	}
+
+	maxProfit := profitArr[0]
+	minProfit := profitArr[0]
+	for _, v := range profitArr {
+		if v.profit < 0 {
+			lossArr = append(lossArr, v)
+		}
+		if v.profit > maxProfit.profit {
+			maxProfit = v
+		}
+		if v.profit < minProfit.profit {
+			minProfit = v
+		}
+	}
+
+	fmt.Println("max profit: ", maxProfit)
+	fmt.Println("min profit: ", minProfit)
+
+	for _, v := range lossArr {
+		fmt.Println("loss day: ", v.DD, " | loss profit: ", v.profit)
+	}
+
+	fmt.Println("total days:", totalDays)
+	fmt.Println("profit day", len(profitArr))
+	fmt.Println("loss days", len(lossArr))
 }

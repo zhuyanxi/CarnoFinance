@@ -14,97 +14,17 @@ import (
 func main() {
 	logrus.Info("lll")
 	//begin should after 2010-06-02, end should before 2021-06-28
-	begin, err := time.Parse("2006-01-02", "2010-06-04")
+	begin, err := time.Parse("2006-01-02", "2012-05-27")
 	ExitIfErr(err)
 	end, err := time.Parse("2006-01-02", "2021-06-25")
 	ExitIfErr(err)
 
-	beginDateExcludeWeekend := []time.Time{}
-	for {
-		begin = begin.Add(24 * time.Hour)
-		if begin.Add(40 * 24 * time.Hour).After(end) {
-			break
-		}
-		exludeTime1, err := time.Parse("2006-01-02", "2015-03-31")
-		ExitIfErr(err)
-		exludeTime2, err := time.Parse("2006-01-02", "2015-07-31")
-		ExitIfErr(err)
-		if begin.After(exludeTime1) && begin.Before(exludeTime2) {
-			fmt.Println(begin)
-			continue
-		}
-		if begin.Weekday() == time.Saturday || begin.Weekday() == time.Sunday {
-			continue
-		}
-		beginDateExcludeWeekend = append(beginDateExcludeWeekend, begin)
-	}
-
-	totalDays := len(beginDateExcludeWeekend)
-	type profitDay struct {
-		DD     time.Time
-		profit float64
-	}
-	lossArr := []profitDay{}
-	profitArr := []profitDay{}
-	for _, v := range beginDateExcludeWeekend {
-		fmt.Println(v)
-
-		// profit := doHS300AndCYB100(v, end)
-		endV := v.Add(2 * 365 * 24 * time.Hour)
-		if endV.After(end) {
-			endV = end
-		}
-		profit := doHS300AndCYB100(v, endV)
-		profitArr = append(profitArr, profitDay{
-			DD:     v,
-			profit: profit,
-		})
-	}
-
-	maxProfit := profitArr[0]
-	minProfit := profitArr[0]
-	for _, v := range profitArr {
-		if v.profit < 0 {
-			lossArr = append(lossArr, v)
-		}
-		if v.profit > maxProfit.profit {
-			maxProfit = v
-		}
-		if v.profit < minProfit.profit {
-			minProfit = v
-		}
-	}
-
-	fmt.Println("max profit: ", maxProfit)
-	fmt.Println("min profit: ", minProfit)
-
-	for _, v := range lossArr {
-		fmt.Println("loss day: ", v.DD, " | loss profit: ", v.profit)
-	}
-
-	fmt.Println("total days:", totalDays)
-	fmt.Println("profit day", len(profitArr))
-	fmt.Println("loss days", len(lossArr))
-
-	// doHS300AndCYB100(begin, end)
+	doHS300AndCYB100(begin, end, Calc4)
 	// doHS300AndZZ500(begin, end)
 	// doSZ50AndCYB100(begin, end)
 }
 
-func doHS300AndCYB100(begin, end time.Time) (profit float64) {
-	fmt.Println()
-	fmt.Println("============================策略开始===============================================")
-	fmt.Println()
-	hs300Inc := CalcInc(GetHS300IndexData(), begin, end)
-	cyb100Inc := CalcInc(GetCYB100IndexData(), begin, end)
-	fmt.Println("hs300 inc: ", hs300Inc)
-	fmt.Println("cyb inc: ", cyb100Inc)
-
-	hs300Inc = CalcProfit(GetHS300IndexData(), begin, end)
-	cyb100Inc = CalcProfit(GetCYB100IndexData(), begin, end)
-	fmt.Println("hs300 profit: ", hs300Inc)
-	fmt.Println("cyb profit: ", cyb100Inc)
-
+func doHS300AndCYB100(begin, end time.Time, calcFunc func(orderedIndex1, orderedIndex2 []IndexData, n int) *Share) (profit float64) {
 	index1, index2 := InitData(begin, end, GetHS300IndexData(), GetCYB100IndexData())
 
 	var holdShare *Share
@@ -119,7 +39,7 @@ func doHS300AndCYB100(begin, end time.Time) (profit float64) {
 	// fmt.Println("============================策略的分界线===============================================")
 	// fmt.Println()
 
-	holdShare = Calc4(index1, index2, 20)
+	holdShare = calcFunc(index1, index2, 20)
 	fmt.Printf("%+v", holdShare)
 	totalMoney = holdShare.HoldMoney + holdShare.Cash
 	fmt.Printf("Total Money:%f\n", totalMoney)
