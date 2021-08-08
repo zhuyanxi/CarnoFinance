@@ -13,15 +13,18 @@ import (
 
 func main() {
 	logrus.Info("lll")
-	//begin should after 2010-06-02, end should before 2021-06-28
-	begin, err := time.Parse("2006-01-02", "2012-05-27")
-	ExitIfErr(err)
-	end, err := time.Parse("2006-01-02", "2021-06-25")
-	ExitIfErr(err)
 
-	doHS300AndCYB100(begin, end, Calc4)
-	// doHS300AndZZ500(begin, end)
-	// doSZ50AndCYB100(begin, end)
+	doScrapeETF(ETF_510230)
+
+	// //begin should after 2010-06-02, end should before 2021-06-28
+	// begin, err := time.Parse("2006-01-02", "2012-05-27")
+	// ExitIfErr(err)
+	// end, err := time.Parse("2006-01-02", "2021-06-25")
+	// ExitIfErr(err)
+
+	// doHS300AndCYB100(begin, end, Calc4)
+	// // doHS300AndZZ500(begin, end)
+	// // doSZ50AndCYB100(begin, end)
 }
 
 func doHS300AndCYB100(begin, end time.Time, calcFunc func(orderedIndex1, orderedIndex2 []IndexData, n int) *Share) (profit float64) {
