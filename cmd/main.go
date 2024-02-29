@@ -7,8 +7,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"github.com/zhuyanxi/CarnoFinance/db"
-	"github.com/zhuyanxi/CarnoFinance/domain"
+	"github.com/zhuyanxi/CarnoFinance/pkg/db"
+	"github.com/zhuyanxi/CarnoFinance/pkg/domain"
+	"github.com/zhuyanxi/CarnoFinance/pkg/helper"
 )
 
 // flow:
@@ -26,7 +27,7 @@ func main() {
 	r := gin.Default()
 	r.Static("/front", "../public")
 	r.GET("/healthz", func(ctx *gin.Context) {
-		ctx.String(200, "ok")
+		helper.GinOK(ctx)
 	})
 	r.POST("/etf", func(ctx *gin.Context) {
 		var price domain.ETFDailyPrice
@@ -40,5 +41,5 @@ func main() {
 		app.InsertETFDailyPrice(price)
 	})
 
-	r.Run(":8080") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	r.Run(":8080") // listen and serve on 0.0.0.0:8080
 }

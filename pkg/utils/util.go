@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/zhuyanxi/CarnoFinance/domain"
+	"github.com/zhuyanxi/CarnoFinance/pkg/domain"
 )
 
 func SetStructFieldValuesByJsonTags(structObj *domain.StockDailyPrice, jsonTags []string, values []any) error {

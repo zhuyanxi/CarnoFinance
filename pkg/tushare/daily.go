@@ -8,8 +8,8 @@ import (
 	"net/http"
 
 	"github.com/sirupsen/logrus"
-	"github.com/zhuyanxi/CarnoFinance/domain"
-	"github.com/zhuyanxi/CarnoFinance/utils"
+	"github.com/zhuyanxi/CarnoFinance/pkg/domain"
+	"github.com/zhuyanxi/CarnoFinance/pkg/utils"
 )
 
 type DailyRequest struct {

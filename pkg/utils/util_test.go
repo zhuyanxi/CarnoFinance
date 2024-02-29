@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/zhuyanxi/CarnoFinance/domain"
+	"github.com/zhuyanxi/CarnoFinance/pkg/domain"
 )
 
 func Test_setStructFieldValues(t *testing.T) {
