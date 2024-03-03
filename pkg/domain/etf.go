@@ -1,5 +1,9 @@
 package domain
 
+type ETFCodeList struct {
+	TSCode string `json:"ts_code,omitempty"`
+}
+
 type ETFDailyPrice struct {
 	TSCode    string  `json:"ts_code,omitempty" binding:"required"`
 	TradeDate string  `json:"trade_date,omitempty"`
