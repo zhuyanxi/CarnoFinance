@@ -77,21 +77,23 @@ func (d *Domain) SetETFPrice(code string, recentCount int) error {
 		return errors.New("kline is empty")
 	}
 
-	item := kline.Data.Item[0]
-	ts := int64(item[0])
-	open := item[2]
-	high := item[3]
-	low := item[4]
-	close := item[5]
+	for i := 0; i < len(kline.Data.Item); i++ {
+		item := kline.Data.Item[i]
+		ts := int64(item[0])
+		open := item[2]
+		high := item[3]
+		low := item[4]
+		close := item[5]
 
-	var etf ETFDailyPrice
-	etf.TSCode = code
-	etf.Open = open
-	etf.High = high
-	etf.Low = low
-	etf.Close = close
-	etf.TradeDate = time.Unix(ts/1000, ts%1000).Format(helper.DateFormat)
-	d.InsertETFDailyPrice(etf)
+		var etf ETFDailyPrice
+		etf.TSCode = code
+		etf.Open = open
+		etf.High = high
+		etf.Low = low
+		etf.Close = close
+		etf.TradeDate = time.Unix(ts/1000, ts%1000).Format(helper.DateFormat)
+		d.InsertETFDailyPrice(etf)
+	}
 
 	return nil
 }

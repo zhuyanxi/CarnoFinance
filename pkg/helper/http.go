@@ -20,3 +20,13 @@ func ExtractCount(c *gin.Context) (int, error) {
 	}
 	return count, nil
 }
+
+func ExtractPeriod(c *gin.Context) (int, error) {
+	periodStr := c.DefaultQuery("period", "25")
+	period, err := strconv.Atoi(periodStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid count"})
+		return 0, err
+	}
+	return period, nil
+}

@@ -4,6 +4,7 @@ go 1.21
 
 require (
 	github.com/gin-gonic/gin v1.9.1
+	github.com/samber/lo v1.39.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.8.3
 	github.com/uptrace/bun v1.1.16
@@ -43,6 +44,7 @@ require (
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	golang.org/x/arch v0.3.0 // indirect
 	golang.org/x/crypto v0.13.0 // indirect
+	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/net v0.15.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
