@@ -3,7 +3,6 @@ package utils
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/zhuyanxi/CarnoFinance/pkg/domain"
 )
 
@@ -14,7 +13,11 @@ func Test_setStructFieldValues(t *testing.T) {
 		if err != nil {
 			t.Errorf("err = %v", err)
 		}
-		assert.Nil(t, err)
-		assert.Equal(t, dr.TSCode, "000001.SZ")
+		if err != nil {
+			t.Errorf("err = %v", err)
+		}
+		if dr.TSCode != "000001.SZ" {
+			t.Errorf("dr.TSCode = %v", dr.TSCode)
+		}
 	})
 }

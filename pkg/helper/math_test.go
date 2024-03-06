@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestRSRS(t *testing.T) {
@@ -15,5 +14,7 @@ func TestRSRS(t *testing.T) {
 	result := RSRS(data)
 	logrus.Infoln(result)
 	res := strconv.FormatFloat(result, 'f', 10, 64)
-	assert.Equal(t, res, "10.3322659698")
+	if res != "10.3322659698" {
+		t.Error("RSRS failed")
+	}
 }
