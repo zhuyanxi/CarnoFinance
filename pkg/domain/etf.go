@@ -26,12 +26,21 @@ type RSRSDto struct {
 	RSRS   float64 `json:"rsrs,omitempty"`
 }
 
-func (d *Domain) GetRSRSList(period int, order string) ([]RSRSDto, error) {
+func (d *Domain) GetETFCodeList() ([]ETFCodeList, error) {
 	var codes []ETFCodeList
 	err := d.db.NewSelect().Model(&codes).Scan(d.ctx)
 	if err != nil {
 		return nil, err
 	}
+	return codes, nil
+}
+
+func (d *Domain) GetRSRSList(period int, order string) ([]RSRSDto, error) {
+	codes, err := d.GetETFCodeList()
+	if err != nil {
+		return nil, err
+	}
+
 	var rets []RSRSDto
 	for _, code := range codes {
 		var pricesList []float64
