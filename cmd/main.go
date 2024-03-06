@@ -40,7 +40,7 @@ func main() {
 
 	//SZ159915
 	r.POST("/etf/last", api.SetETFPrice(app))
-	r.GET("/rsrslist", api.GetRSRSList(app))
+	r.GET("/etf/rsrslist", api.GetRSRSList(app))
 
 	r.Run(":8080") // listen and serve on 0.0.0.0:8080
 }

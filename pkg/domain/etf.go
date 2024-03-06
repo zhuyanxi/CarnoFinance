@@ -10,6 +10,7 @@ import (
 
 type ETFCodeList struct {
 	TSCode string `json:"ts_code,omitempty"`
+	Name   string `json:"name,omitempty"`
 }
 
 type ETFDailyPrice struct {
@@ -23,6 +24,7 @@ type ETFDailyPrice struct {
 
 type RSRSDto struct {
 	TsCode string  `json:"ts_code,omitempty"`
+	Name   string  `json:"name,omitempty"`
 	RSRS   float64 `json:"rsrs,omitempty"`
 }
 
@@ -36,16 +38,16 @@ func (d *Domain) GetETFCodeList() ([]ETFCodeList, error) {
 }
 
 func (d *Domain) GetRSRSList(period int, order string) ([]RSRSDto, error) {
-	codes, err := d.GetETFCodeList()
+	etfList, err := d.GetETFCodeList()
 	if err != nil {
 		return nil, err
 	}
 
 	var rets []RSRSDto
-	for _, code := range codes {
+	for _, etf := range etfList {
 		var pricesList []float64
 		err := d.db.NewSelect().Model((*ETFDailyPrice)(nil)).Column("close").
-			Where("ts_code=?", code.TSCode).
+			Where("ts_code=?", etf.TSCode).
 			Order("trade_date DESC").
 			Limit(period).
 			Scan(d.ctx, &pricesList)
@@ -56,7 +58,8 @@ func (d *Domain) GetRSRSList(period int, order string) ([]RSRSDto, error) {
 		reversePrice := lo.Reverse(pricesList)
 		score := helper.RSRS(reversePrice)
 		rets = append(rets, RSRSDto{
-			TsCode: code.TSCode,
+			TsCode: etf.TSCode,
+			Name:   etf.Name,
 			RSRS:   score,
 		})
 	}

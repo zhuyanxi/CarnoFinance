@@ -1,5 +1,10 @@
 package domain
 
+type StockCodeList struct {
+	TSCode string `bun:"ts_code,pk" json:"ts_code,omitempty"`
+	Name   string `json:"name,omitempty"`
+}
+
 type StockDailyPrice struct {
 	TSCode    string  `json:"ts_code,omitempty"`
 	TradeDate string  `json:"trade_date,omitempty"`
