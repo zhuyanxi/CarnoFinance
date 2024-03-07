@@ -34,6 +34,8 @@ func (d *Domain) Init() {
 	logrus.Infof("%+v", err)
 	_, err = d.db.NewCreateTable().Model((*ETFCodeList)(nil)).Exec(d.ctx)
 	logrus.Infof("%+v", err)
+
+	d.InitLastOneDayETFPrice()
 }
 
 // {

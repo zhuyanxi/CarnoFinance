@@ -82,3 +82,16 @@ func (d *Domain) InsertETFDailyPrice(data ETFDailyPrice) {
 	}
 	d.db.NewInsert().Model(&data).Exec(d.ctx)
 }
+
+func (d *Domain) InitLastOneDayETFPrice() error {
+	codes, err := d.GetETFCodeList()
+	if err != nil {
+		logrus.Errorf("get etf code list error: %v", err)
+
+		return err
+	}
+	for _, code := range codes {
+		d.SetETFPrice(code.TSCode, -1)
+	}
+	return nil
+}

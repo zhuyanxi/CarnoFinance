@@ -1,8 +1,6 @@
 package api
 
 import (
-	"sync"
-
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/zhuyanxi/CarnoFinance/pkg/domain"
@@ -19,15 +17,9 @@ func SetETFPrice(app *domain.Domain) func(ctx *gin.Context) {
 				ctx.JSON(500, gin.H{"error": err.Error()})
 				return
 			}
-			var wg sync.WaitGroup
 			for _, code := range codes {
-				wg.Add(1)
-				go func(tsCode string) {
-					defer wg.Done()
-					app.SetETFPrice(tsCode, -1)
-				}(code.TSCode)
+				app.SetETFPrice(code.TSCode, -1)
 			}
-			wg.Wait()
 		} else {
 			count, err := helper.ExtractCount(ctx)
 			if err != nil {
