@@ -43,7 +43,7 @@ func GetRSRSList(app *domain.Domain) func(ctx *gin.Context) {
 			logrus.Errorf("set period error: %v", err)
 			return
 		}
-		list, err := app.GetRSRSList(period, ctx.DefaultQuery("order", "desc"))
+		list, err := app.GetETFRSRSList(period, ctx.DefaultQuery("order", "desc"))
 		if err != nil {
 			logrus.Errorf("get rsrs list error: %v", err)
 			ctx.JSON(500, gin.H{"error": err.Error()})

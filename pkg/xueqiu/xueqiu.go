@@ -1,8 +1,8 @@
 package xueqiu
 
 import (
-	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 
@@ -10,10 +10,9 @@ import (
 )
 
 const (
-	XueQiuHost  = "https://xueqiu.com/"
-	UserAgent   = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/000000000 Safari/537.36"
-	TokenName   = "xq_a_token"
-	KLineFormat = "https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol=%s&begin=%d&period=%s&type=%s&count=%d"
+	XueQiuHost = "https://xueqiu.com/"
+	UserAgent  = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/000000000 Safari/537.36"
+	TokenName  = "xq_a_token"
 )
 
 type XueQiu struct {
@@ -74,33 +73,10 @@ func (x *XueQiu) getToken() string {
 	return ""
 }
 
-type KLine struct {
-	Data KLineData `json:"data,omitempty"`
-}
-type KLineData struct {
-	Column           []string    `json:"column,omitempty"`
-	Item             [][]float64 `json:"item,omitempty"`
-	ErrorCode        int         `json:"error_code,omitempty"`
-	ErrorDescription string      `json:"error_description,omitempty"`
-}
-
-type KLineQuery struct {
-	Symbol string `json:"symbol,omitempty"`
-	Period string `json:"period,omitempty"`
-	Type   string `json:"type,omitempty"`
-	Count  int    `json:"count,omitempty"`
-}
-
-// https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol=SZ159915&begin=1709537063110&period=day&type=before&count=-284&indicator=kline,pe,pb,ps,pcf,market_capital,agt,ggt,balance
-func (x *XueQiu) GetKline(q KLineQuery) (KLine, error) {
-	if x.token == "" {
-		return KLine{}, fmt.Errorf("token is empty")
-	}
-
-	qUrl := fmt.Sprintf(KLineFormat, q.Symbol, time.Now().UnixMilli(), q.Period, q.Type, q.Count)
-	req, err := http.NewRequest("GET", qUrl, nil)
+func (x *XueQiu) requestXueqiu(qUrl string) ([]byte, error) {
+	req, err := http.NewRequest(http.MethodGet, qUrl, nil)
 	if err != nil {
-		return KLine{}, err
+		return nil, err
 	}
 
 	req.Header.Set("User-Agent", UserAgent)
@@ -108,17 +84,17 @@ func (x *XueQiu) GetKline(q KLineQuery) (KLine, error) {
 
 	resp, err := x.hc.Do(req)
 	if err != nil {
-		return KLine{}, err
+		return nil, err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
-		return KLine{}, fmt.Errorf("failed to get kline: %s", resp.Status)
+		return nil, fmt.Errorf("failed to request xueqiu: %s", resp.Status)
 	}
 
-	var kline KLine
-	if err := json.NewDecoder(resp.Body).Decode(&kline); err != nil {
-		return KLine{}, err
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
 	}
 
-	return kline, nil
+	return bodyBytes, nil
 }

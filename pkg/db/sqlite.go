@@ -8,6 +8,7 @@ import (
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/sqlitedialect"
 	"github.com/uptrace/bun/driver/sqliteshim"
+	"github.com/uptrace/bun/extra/bundebug"
 )
 
 func NewSqlite(ctx context.Context) *bun.DB {
@@ -20,6 +21,7 @@ func NewSqlite(ctx context.Context) *bun.DB {
 	if err := db.Ping(); err != nil {
 		panic(err)
 	}
+	db.AddQueryHook(bundebug.NewQueryHook())
 
 	return db
 }
