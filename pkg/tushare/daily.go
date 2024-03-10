@@ -33,7 +33,7 @@ type DailyRequest struct {
 // 	Amount    float64 `json:"amount,omitempty"`
 // }
 
-func (t *Tushare) GetDailyPrices(dailyReq DailyRequest) ([]domain.StockDailyPrice, error) {
+func (t *Tushare) GetDailyPrices(dailyReq DailyRequest) ([]domain.StockDailyBeforePrice, error) {
 	tushareReq := TushareRequest{
 		APIName: "daily",
 		Token:   t.Token,
@@ -94,11 +94,11 @@ func (t *Tushare) GetDailyPrices(dailyReq DailyRequest) ([]domain.StockDailyPric
 	return convertToDailyPrices(tushareResp.Data), nil
 }
 
-func convertToDailyPrices(data TushareResponseData) []domain.StockDailyPrice {
-	rets := make([]domain.StockDailyPrice, 0)
+func convertToDailyPrices(data TushareResponseData) []domain.StockDailyBeforePrice {
+	rets := make([]domain.StockDailyBeforePrice, 0)
 
 	for _, item := range data.Items {
-		dr := new(domain.StockDailyPrice)
+		dr := new(domain.StockDailyBeforePrice)
 		utils.SetStructFieldValuesByJsonTags(dr, data.Fields, item)
 		rets = append(rets, *dr)
 	}

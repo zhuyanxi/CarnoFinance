@@ -21,7 +21,8 @@ func NewSqlite(ctx context.Context) *bun.DB {
 	if err := db.Ping(); err != nil {
 		panic(err)
 	}
-	db.AddQueryHook(bundebug.NewQueryHook())
+	// db.AddQueryHook(bundebug.NewQueryHook())
+	db.AddQueryHook(bundebug.NewQueryHook(bundebug.WithVerbose(true)))
 
 	return db
 }

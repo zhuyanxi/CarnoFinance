@@ -7,6 +7,27 @@ import (
 	"github.com/zhuyanxi/CarnoFinance/pkg/helper"
 )
 
+func GetETFClosePrices(app *domain.Domain) func(ctx *gin.Context) {
+	return func(ctx *gin.Context) {
+		count, err := helper.ExtractCount(ctx)
+		if err != nil {
+			logrus.Errorf("extract count error: %v", err)
+			return
+		}
+		dates, list, err := app.GetETFClosePrices(ctx.Param("code"), count)
+		if err != nil {
+			logrus.Errorf("get etf price list error: %v", err)
+			ctx.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(200, gin.H{
+			"count":  len(list),
+			"dates":  dates,
+			"prices": list,
+		})
+	}
+}
+
 func SetETFPrice(app *domain.Domain) func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
 		code := ctx.Query("code")

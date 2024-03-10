@@ -57,7 +57,7 @@ func (d *Domain) SetETFPrice(code string, recentCount int) error {
 	kline, err := d.xqc.GetKline(xueqiu.KLineQuery{
 		Symbol: code,
 		Period: "day",
-		Type:   "before",
+		Type:   xueqiu.KLineTypeBefore,
 		Count:  recentCount,
 	})
 	if err != nil {

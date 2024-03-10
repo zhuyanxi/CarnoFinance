@@ -8,7 +8,7 @@ import (
 	"github.com/zhuyanxi/CarnoFinance/pkg/domain"
 )
 
-func SetStructFieldValuesByJsonTags(structObj *domain.StockDailyPrice, jsonTags []string, values []any) error {
+func SetStructFieldValuesByJsonTags(structObj *domain.StockDailyBeforePrice, jsonTags []string, values []any) error {
 	structValue := reflect.ValueOf(structObj).Elem()
 	for i, tagName := range jsonTags {
 		fieldName := getFieldNameByJsonTag(structObj, tagName)

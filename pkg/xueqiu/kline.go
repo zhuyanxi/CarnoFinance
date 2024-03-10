@@ -8,6 +8,24 @@ import (
 
 const KLineFormat = "https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol=%s&begin=%d&period=%s&type=%s&count=%d"
 
+type KLineType string
+
+const (
+	KLineTypeBefore KLineType = "before"
+	KLineTypeNormal KLineType = "normal"
+	KLineTypeAfter  KLineType = "after"
+)
+
+type KLinePeriod string
+
+const (
+	KLinePeriodDay     KLinePeriod = "day"
+	KLinePeriodWeek    KLinePeriod = "week"
+	KLinePeriodMonth   KLinePeriod = "month"
+	KLinePeriodQuarter KLinePeriod = "quarter"
+	KLinePeriodYear    KLinePeriod = "year"
+)
+
 type KLine struct {
 	Data KLineData `json:"data,omitempty"`
 }
@@ -20,8 +38,9 @@ type KLineData struct {
 type KLineQuery struct {
 	Symbol string `json:"symbol,omitempty"`
 	Period string `json:"period,omitempty"`
-	Type   string `json:"type,omitempty"`
-	Count  int    `json:"count,omitempty"`
+	// before-前复权，normal-除权，after-后复权
+	Type  KLineType `json:"type,omitempty"`
+	Count int       `json:"count,omitempty"`
 }
 
 // https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol=SZ159915&begin=1709537063110&period=day&type=before&count=-284&indicator=kline,pe,pb,ps,pcf,market_capital,agt,ggt,balance

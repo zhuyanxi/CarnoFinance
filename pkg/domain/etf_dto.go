@@ -49,3 +49,16 @@ func (d *Domain) GetETFRSRSList(period int, order string) ([]RSRSDto, error) {
 
 	return rets, nil
 }
+
+func (d *Domain) GetETFClosePrices(code string, count int) ([]string, []float64, error) {
+	var dates []string
+	if err := d.db.NewSelect().Model((*ETFDailyPrice)(nil)).Column("trade_date").Where("ts_code=?", code).Order("trade_date DESC").Limit(count).Scan(d.ctx, &dates); err != nil {
+		return nil, nil, err
+	}
+
+	var closes []float64
+	if err := d.db.NewSelect().Model((*ETFDailyPrice)(nil)).Column("close").Where("ts_code=?", code).Order("trade_date DESC").Limit(count).Scan(d.ctx, &closes); err != nil {
+		return nil, nil, err
+	}
+	return lo.Reverse(dates), lo.Reverse(closes), nil
+}
