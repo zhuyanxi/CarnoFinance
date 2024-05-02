@@ -1,6 +1,8 @@
 package api
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/zhuyanxi/CarnoFinance/pkg/domain"
@@ -64,7 +66,7 @@ func GetRSRSList(app *domain.Domain) func(ctx *gin.Context) {
 			logrus.Errorf("set period error: %v", err)
 			return
 		}
-		list, err := app.GetETFRSRSList(period, ctx.DefaultQuery("order", "desc"))
+		list, err := app.GetETFRSRSList(period, ctx.DefaultQuery("order", "desc"), ctx.DefaultQuery("date", time.Now().Format("20060102")))
 		if err != nil {
 			logrus.Errorf("get rsrs list error: %v", err)
 			ctx.JSON(500, gin.H{"error": err.Error()})

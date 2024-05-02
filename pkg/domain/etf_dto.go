@@ -13,7 +13,7 @@ type RSRSDto struct {
 	RSRS   float64 `json:"rsrs,omitempty"`
 }
 
-func (d *Domain) GetETFRSRSList(period int, order string) ([]RSRSDto, error) {
+func (d *Domain) GetETFRSRSList(period int, order, date string) ([]RSRSDto, error) {
 	etfList, err := d.GetETFCodeList()
 	if err != nil {
 		return nil, err
@@ -23,7 +23,7 @@ func (d *Domain) GetETFRSRSList(period int, order string) ([]RSRSDto, error) {
 	for _, etf := range etfList {
 		var pricesList []float64
 		err := d.db.NewSelect().Model((*ETFDailyPrice)(nil)).Column("close").
-			Where("ts_code=?", etf.TSCode).
+			Where("ts_code=?", etf.TSCode).Where("trade_date<=?", date).
 			Order("trade_date DESC").
 			Limit(period).
 			Scan(d.ctx, &pricesList)
