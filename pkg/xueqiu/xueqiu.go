@@ -10,6 +10,7 @@ import (
 )
 
 const (
+	UserId     = "8240766375"
 	XueQiuHost = "https://xueqiu.com/"
 	UserAgent  = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/000000000 Safari/537.36"
 	TokenName  = "xq_a_token"
@@ -80,7 +81,7 @@ func (x *XueQiu) requestXueqiu(qUrl string) ([]byte, error) {
 	}
 
 	req.Header.Set("User-Agent", UserAgent)
-	req.Header.Set("Cookie", fmt.Sprintf("%s=%s;", TokenName, x.token))
+	req.Header.Set("Cookie", fmt.Sprintf("u=%s;%s=%s;", UserId, TokenName, x.token))
 
 	resp, err := x.hc.Do(req)
 	if err != nil {

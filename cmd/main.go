@@ -14,6 +14,8 @@ import (
 	"github.com/zhuyanxi/CarnoFinance/pkg/xueqiu"
 )
 
+// curl --location 'http://localhost:8080/etf/rsrslist?period=25&date=20240705'
+
 // flow:
 // init history data: get all stock index and data
 
