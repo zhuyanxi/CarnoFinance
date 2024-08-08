@@ -48,7 +48,7 @@ func (d *Domain) InitLastOneDayETFPrice() error {
 		return err
 	}
 	for _, code := range codes {
-		d.SetETFPrice(code.TSCode, -3)
+		d.SetETFPrice(code.TSCode, -5)
 	}
 	return nil
 }
