@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol=SH601888&begin=1725454058238&period=day&type=before&count=-284&indicator=kline,pe,pb,ps,pcf,market_capital,agt,ggt,balance
 const KLineFormat = "https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol=%s&begin=%d&period=%s&type=%s&count=%d"
 
 type KLineType string
@@ -43,11 +44,11 @@ type KLineQuery struct {
 	Count int       `json:"count,omitempty"`
 }
 
-// https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol=SZ159915&begin=1709537063110&period=day&type=before&count=-284&indicator=kline,pe,pb,ps,pcf,market_capital,agt,ggt,balance
+// https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol=SH601888&begin=1725454058238&period=day&type=before&count=-284&indicator=kline,pe,pb,ps,pcf,market_capital,agt,ggt,balance
 func (x *XueQiu) GetKline(q KLineQuery) (KLine, error) {
-	if x.token == "" {
-		return KLine{}, fmt.Errorf("token is empty")
-	}
+	// if x.token == "" {
+	// 	return KLine{}, fmt.Errorf("token is empty")
+	// }
 
 	qUrl := fmt.Sprintf(KLineFormat, q.Symbol, time.Now().UnixMilli(), q.Period, q.Type, q.Count)
 	respBody, err := x.requestXueqiu(qUrl)

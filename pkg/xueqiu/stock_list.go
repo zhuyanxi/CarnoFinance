@@ -22,9 +22,9 @@ type StockListItem struct {
 }
 
 func (x *XueQiu) GetStockList(page, size int) (StockList, error) {
-	if x.token == "" {
-		return StockList{}, fmt.Errorf("token is empty")
-	}
+	// if x.token == "" {
+	// 	return StockList{}, fmt.Errorf("token is empty")
+	// }
 
 	qUrl := fmt.Sprintf(StockListFormat, page, size)
 	respBody, err := x.requestXueqiu(qUrl)
