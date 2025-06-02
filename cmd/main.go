@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/zhuyanxi/CarnoFinance/pkg/api"
@@ -35,7 +36,23 @@ func main() {
 	app.Init()
 
 	r := gin.Default()
-	r.Static("/front", "../public")
+	// CORS for https://foo.com and https://github.com origins, allowing:
+	// - PUT and PATCH methods
+	// - Origin header
+	// - Credentials share
+	// - Preflight requests cached for 12 hours
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST", "DELETE"},
+		AllowHeaders:     []string{"Origin"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		AllowOriginFunc: func(origin string) bool {
+			return origin == "http://localhost:8080"
+		},
+		MaxAge: 12 * time.Hour,
+	}))
+	r.Static("/ui", "../ui/build")
 	r.GET("/healthz", func(ctx *gin.Context) {
 		helper.GinOK(ctx)
 	})
