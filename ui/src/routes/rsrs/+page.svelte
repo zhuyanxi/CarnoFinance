@@ -45,6 +45,7 @@
 		{ label: 'Name', key: 'name' },
 		{ label: 'RSRS', key: 'rsrs' }
 	];
+    fetchData(period, date);
 </script>
 
 <div class="max-w-4xl mx-auto">

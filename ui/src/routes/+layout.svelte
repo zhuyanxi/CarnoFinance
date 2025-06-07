@@ -1,8 +1,11 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import '../app.css';
-	import { ChartNoAxesCombined, ChartPie, House, Settings } from '@lucide/svelte';
+	import { BadgeDollarSign, ChartNoAxesCombined, ChartPie, House, Settings } from '@lucide/svelte';
 
 	let { children } = $props();
+	let activePath = 'bg-indigo-600 text-white';
+	let nonActivePath = 'text-indigo-200 hover:bg-indigo-700 hover:text-white';
 </script>
 
 <div class="flex h-screen">
@@ -13,24 +16,19 @@
 		</a>
 
 		<nav class="nav">
-			<a
-				href="/rsrs"
-				class="bg-indigo-600 text-white"
-			>
+			<a href="/rsrs" class="{ page.url.pathname === '/rsrs' ? activePath : nonActivePath }}">
 				<ChartNoAxesCombined color="#ffffff" strokeWidth={1} />
 				<span>ETF RSRS Data</span>
 			</a>
-			<a
-				href="/kalmanfilter"
-				class="text-indigo-200 hover:bg-indigo-700 hover:text-white"
-			>
+			<a href="/kalmanfilter" class="{ page.url.pathname === '/kalmanfilter' ? activePath : nonActivePath }">
 				<ChartPie color="#ffffff" strokeWidth={1} />
 				<span>Kalmanfilter</span>
 			</a>
-			<a
-				href="#top"
-				class="text-indigo-200 hover:bg-indigo-700 hover:text-white"
-			>
+			<a href="/option/margin" class="{ page.url.pathname === '/option/margin' ? activePath : nonActivePath }">
+				<BadgeDollarSign />
+				<span>OptionMargin</span>
+			</a>
+			<a href="#top" class="{ page.url.pathname === '/settings' ? activePath : nonActivePath }">
 				<Settings color="#ffffff" strokeWidth={1} />
 				<span>Settings</span>
 			</a>

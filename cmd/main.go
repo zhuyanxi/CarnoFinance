@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -36,23 +38,40 @@ func main() {
 	app.Init()
 
 	r := gin.Default()
-	// CORS for https://foo.com and https://github.com origins, allowing:
-	// - PUT and PATCH methods
+	// CORS for http://localhost:5173 origins
 	// - Origin header
 	// - Credentials share
 	// - Preflight requests cached for 12 hours
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"},
-		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST", "DELETE"},
-		AllowHeaders:     []string{"Origin"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		AllowOriginFunc: func(origin string) bool {
-			return origin == "http://localhost:8080"
-		},
+		AllowOrigins:  []string{"http://localhost:5173"},
+		AllowMethods:  []string{"PUT", "PATCH", "GET", "POST", "DELETE"},
+		AllowHeaders:  []string{"Origin"},
+		ExposeHeaders: []string{"Content-Length"},
+		// AllowCredentials: true,
+		// AllowOriginFunc: func(origin string) bool {
+		// 	return origin == "http://localhost:8080"
+		// },
 		MaxAge: 12 * time.Hour,
 	}))
-	r.Static("/ui", "../ui/build")
+	frontendDistPath := filepath.Join("..", "ui", "build")
+	r.Static("/_ui", frontendDistPath)
+	r.NoRoute(func(c *gin.Context) {
+		// 检查请求路径是否像是静态文件 (例如，以 .js, .css, .png 等结尾)
+		// 避免将所有请求都重定向到 index.html，导致静态资源无法加载
+		path := c.Request.URL.Path
+		if strings.HasPrefix(path, "/assets/") || strings.HasPrefix(path, "/_app/") ||
+			strings.HasSuffix(path, ".js") || strings.HasSuffix(path, ".css") ||
+			strings.HasSuffix(path, ".png") || strings.HasSuffix(path, ".jpg") ||
+			strings.HasSuffix(path, ".jpeg") || strings.HasSuffix(path, ".gif") ||
+			strings.HasSuffix(path, ".svg") || strings.HasSuffix(path, ".ico") {
+			c.File(filepath.Join(frontendDistPath, path)) // 尝试直接提供静态文件
+			return
+		}
+
+		// 对于所有其他未匹配的路由（即前端路由），返回 index.html
+		c.File(filepath.Join(frontendDistPath, "index.html"))
+	})
+
 	r.GET("/healthz", func(ctx *gin.Context) {
 		helper.GinOK(ctx)
 	})
