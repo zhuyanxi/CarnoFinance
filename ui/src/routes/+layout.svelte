@@ -16,19 +16,25 @@
 		</a>
 
 		<nav class="nav">
-			<a href="/rsrs" class="{ page.url.pathname === '/rsrs' ? activePath : nonActivePath }}">
+			<a href="/rsrs" class="{page.url.pathname === '/rsrs' ? activePath : nonActivePath}}">
 				<ChartNoAxesCombined color="#ffffff" strokeWidth={1} />
 				<span>ETF RSRS Data</span>
 			</a>
-			<a href="/kalmanfilter" class="{ page.url.pathname === '/kalmanfilter' ? activePath : nonActivePath }">
+			<a
+				href="/kalmanfilter"
+				class={page.url.pathname === '/kalmanfilter' ? activePath : nonActivePath}
+			>
 				<ChartPie color="#ffffff" strokeWidth={1} />
 				<span>Kalmanfilter</span>
 			</a>
-			<a href="/option/margin" class="{ page.url.pathname === '/option/margin' ? activePath : nonActivePath }">
+			<a
+				href="/option/margin"
+				class={page.url.pathname === '/option/margin' ? activePath : nonActivePath}
+			>
 				<BadgeDollarSign />
 				<span>OptionMargin</span>
 			</a>
-			<a href="#top" class="{ page.url.pathname === '/settings' ? activePath : nonActivePath }">
+			<a href="#top" class={page.url.pathname === '/settings' ? activePath : nonActivePath}>
 				<Settings color="#ffffff" strokeWidth={1} />
 				<span>Settings</span>
 			</a>
@@ -56,7 +62,9 @@
 			</a>
 		</div> -->
 	</aside>
-	{@render children()}
+	<main class="p-4 md:p-8 flex-1">
+		{@render children()}
+	</main>
 </div>
 
 <style lang="postcss">

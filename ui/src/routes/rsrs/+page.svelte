@@ -11,6 +11,7 @@
 	});
 	const fetchData = async (period: string, date: string) => {
 		try {
+			date = date.replace(/-/g, ''); // Convert date to YYYYMMDD format
 			const response = await fetch(
 				`http://localhost:8080/etf/rsrslist?period=${period}&date=${date}`
 			);
@@ -71,8 +72,8 @@
 				<input
 					id="date"
 					name="date"
-					type="text"
-					placeholder="YYYYMMDD"
+					type="date"
+					placeholder="YYYY-MM-DD"
 					bind:value={date}
 					required
 					class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"

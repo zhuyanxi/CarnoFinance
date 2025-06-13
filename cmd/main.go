@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"os"
-	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -53,30 +51,28 @@ func main() {
 		// },
 		MaxAge: 12 * time.Hour,
 	}))
-	frontendDistPath := filepath.Join("..", "ui", "build")
-	r.Static("/_ui", frontendDistPath)
-	r.NoRoute(func(c *gin.Context) {
-		// 检查请求路径是否像是静态文件 (例如，以 .js, .css, .png 等结尾)
-		// 避免将所有请求都重定向到 index.html，导致静态资源无法加载
-		path := c.Request.URL.Path
-		if strings.HasPrefix(path, "/assets/") || strings.HasPrefix(path, "/_app/") ||
-			strings.HasSuffix(path, ".js") || strings.HasSuffix(path, ".css") ||
-			strings.HasSuffix(path, ".png") || strings.HasSuffix(path, ".jpg") ||
-			strings.HasSuffix(path, ".jpeg") || strings.HasSuffix(path, ".gif") ||
-			strings.HasSuffix(path, ".svg") || strings.HasSuffix(path, ".ico") {
-			c.File(filepath.Join(frontendDistPath, path)) // 尝试直接提供静态文件
-			return
-		}
-
-		// 对于所有其他未匹配的路由（即前端路由），返回 index.html
-		c.File(filepath.Join(frontendDistPath, "index.html"))
-	})
+	// frontendDistPath := filepath.Join("..", "ui", "build")
+	// r.Static("/_ui", frontendDistPath)
+	// r.NoRoute(func(c *gin.Context) {
+	// 	// Check if the request path resembles a static file (e.g., ends with .js, .css, .png, etc.)
+	// 	// Prevent redirecting all requests to index.html, which could cause static resources to fail loading.
+	// 	path := c.Request.URL.Path
+	// 	if strings.HasPrefix(path, "/assets/") || strings.HasPrefix(path, "/_app/") ||
+	// 		strings.HasSuffix(path, ".js") || strings.HasSuffix(path, ".css") ||
+	// 		strings.HasSuffix(path, ".png") || strings.HasSuffix(path, ".jpg") ||
+	// 		strings.HasSuffix(path, ".jpeg") || strings.HasSuffix(path, ".gif") ||
+	// 		strings.HasSuffix(path, ".svg") || strings.HasSuffix(path, ".ico") {
+	// 		c.File(filepath.Join(frontendDistPath, path)) // Serve static files directly if the path matches
+	// 		return
+	// 	}
+	// 	// For all other requests, serve the index.html file
+	// 	c.File(filepath.Join(frontendDistPath, "index.html"))
+	// })
 
 	r.GET("/healthz", func(ctx *gin.Context) {
 		helper.GinOK(ctx)
 	})
 
-	//SZ159915
 	r.POST("/etf/last", api.SetETFPrice(app))
 	r.GET("/etf/rsrslist", api.GetRSRSList(app))
 	r.GET("/etf/:code/close", api.GetETFClosePrices(app))
