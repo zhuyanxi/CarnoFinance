@@ -75,3 +75,18 @@ func GetRSRSList(app *domain.Domain) func(ctx *gin.Context) {
 		ctx.JSON(200, list)
 	}
 }
+
+func GetETFHighGreaterThanOpen(app *domain.Domain) func(ctx *gin.Context) {
+	return func(ctx *gin.Context) {
+		count, proportion, err := app.CountHighGreaterThanOpen(ctx.Param("code"))
+		if err != nil {
+			logrus.Errorf("get etf high greater than open list error: %v", err)
+			ctx.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(200, gin.H{
+			"count":      count,
+			"proportion": proportion,
+		})
+	}
+}

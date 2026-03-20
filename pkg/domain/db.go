@@ -24,13 +24,13 @@ func NewDomain(ctx context.Context, db *bun.DB, xqc *xueqiu.XueQiu) *Domain {
 
 func (d *Domain) Init() {
 	_, err := d.db.NewCreateTable().Model((*StockDailyBeforePrice)(nil)).Exec(d.ctx)
-	logrus.Infof("%+v", err)
+	logrus.Errorf("%+v", err)
 	_, err = d.db.NewCreateTable().Model((*ETFDailyPrice)(nil)).Exec(d.ctx)
-	logrus.Infof("%+v", err)
+	logrus.Errorf("%+v", err)
 	_, err = d.db.NewCreateTable().Model((*StockCodeList)(nil)).Exec(d.ctx)
-	logrus.Infof("%+v", err)
+	logrus.Errorf("%+v", err)
 	_, err = d.db.NewCreateTable().Model((*ETFCodeList)(nil)).Exec(d.ctx)
-	logrus.Infof("%+v", err)
+	logrus.Errorf("%+v", err)
 
 	d.InitLastOneDayETFPrice()
 	// d.InitStockList()

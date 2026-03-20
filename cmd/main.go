@@ -33,6 +33,8 @@ func main() {
 	sqlite := db.NewSqlite(ctx)
 	xqc := xueqiu.New()
 	app := domain.NewDomain(ctx, sqlite, xqc)
+
+	// logrus.Infof("Total profit for SH518880: %f", app.CalcGoldETFTotalProfit())
 	app.Init()
 
 	r := gin.Default()
@@ -76,6 +78,7 @@ func main() {
 	r.POST("/etf/last", api.SetETFPrice(app))
 	r.GET("/etf/rsrslist", api.GetRSRSList(app))
 	r.GET("/etf/:code/close", api.GetETFClosePrices(app))
+	r.GET("/etf/:code/HighGreaterThanOpen", api.GetETFHighGreaterThanOpen(app))
 
 	r.Run(":8080") // listen and serve on 0.0.0.0:8080
 }
