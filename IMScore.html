@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>中证1000周频打分卡</title>
+  <style>
+    body { font-family: Arial; padding: 20px; max-width: 600px; margin: auto; }
+    h1 { font-size: 20px; }
+    .section { margin-bottom: 20px; }
+    .btn { padding: 6px 10px; margin: 4px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; }
+    .active { background: black; color: white; }
+    .result { margin-top: 20px; padding: 10px; border: 1px solid #ccc; border-radius: 10px; }
+  </style>
+</head>
+<body>
+  <h1>中证1000 周频打分卡</h1>
+
+  <div id="app"></div>
+
+  <div class="result">
+    <div>总分：<span id="score">0</span></div>
+    <div>策略建议：<span id="strategy">-</span></div>
+  </div>
+
+  <script>
+    const config = {
+      basis: {
+        title: "贴水年化",
+        options: [
+          [">12%", 30], ["8~12%", 25], ["5~8%", 15], ["2~5%", 5], ["<2%", 0]
+        ]
+      },
+      trend: {
+        title: "市场趋势",
+        options: [["上涨", 20], ["震荡", 10], ["下跌", 0]]
+      },
+      vol: {
+        title: "波动率",
+        options: [["适中", 20], ["低", 15], ["高", 5]]
+      },
+      skew: {
+        title: "Skew",
+        options: [["Put明显更贵", 15], ["略贵", 10], ["平", 5], ["Call更贵", 0]]
+      },
+      time: {
+        title: "合约时间",
+        options: [["次月", 15], ["季月", 10], ["当月(<10天)", 0]]
+      }
+    };
+
+    const state = {};
+
+    const app = document.getElementById("app");
+
+    function render() {
+      app.innerHTML = "";
+      Object.keys(config).forEach(key => {
+        const section = document.createElement("div");
+        section.className = "section";
+
+        const title = document.createElement("div");
+        title.innerText = config[key].title;
+        section.appendChild(title);
+
+        config[key].options.forEach(([label, score]) => {
+          const btn = document.createElement("button");
+          btn.innerText = label;
+          btn.className = "btn" + (state[key] === score ? " active" : "");
+
+          btn.onclick = () => {
+            state[key] = score;
+            update();
+          };
+
+          section.appendChild(btn);
+        });
+
+        app.appendChild(section);
+      });
+    }
+
+    function getTotal() {
+      return Object.values(state).reduce((a, b) => a + b, 0);
+    }
+
+    function getStrategy(total) {
+      if (total >= 80) return "🟢 强做：Collar（多期货 + 买Put + 卖Call）";
+      if (total >= 60) return "🟡 可做：Covered Call（多期货 + 卖Call）";
+      if (total >= 40) return "🟠 谨慎：轻仓或保护";
+      return "🔴 不做：空仓";
+    }
+
+    function update() {
+      render();
+      const total = getTotal();
+      document.getElementById("score").innerText = total;
+      document.getElementById("strategy").innerText = getStrategy(total);
+    }
+
+    render();
+  </script>
+</body>
+</html>
