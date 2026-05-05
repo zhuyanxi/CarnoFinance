@@ -1,4 +1,4 @@
-.PHONY: dev build import-ashare-yahoo
+.PHONY: dev build import-ashare-yahoo upload-r2
 
 dev:
 	@echo "Running in development mode..."
@@ -8,3 +8,6 @@ dev:
 
 import-ashare-yahoo:
 	@go run ./cmd/yahooimport
+
+upload-r2:
+	@go run ./cmd/r2upload
