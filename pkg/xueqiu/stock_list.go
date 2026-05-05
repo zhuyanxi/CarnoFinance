@@ -5,7 +5,10 @@ import (
 	"fmt"
 )
 
-const StockListFormat = "https://stock.xueqiu.com/v5/stock/screener/quote/list.json?page=%d&size=%d&order=desc&order_by=market_capital&market=CN&type=sh_sz"
+const (
+	DefaultStockListType = "sh_sz"
+	StockListFormat      = "https://stock.xueqiu.com/v5/stock/screener/quote/list.json?page=%d&size=%d&order=desc&order_by=market_capital&market=CN&type=%s"
+)
 
 type StockList struct {
 	Data             StockListData `json:"data,omitempty"`
@@ -22,11 +25,18 @@ type StockListItem struct {
 }
 
 func (x *XueQiu) GetStockList(page, size int) (StockList, error) {
+	return x.GetStockListByType(DefaultStockListType, page, size)
+}
+
+func (x *XueQiu) GetStockListByType(listType string, page, size int) (StockList, error) {
 	// if x.token == "" {
 	// 	return StockList{}, fmt.Errorf("token is empty")
 	// }
+	if listType == "" {
+		listType = DefaultStockListType
+	}
 
-	qUrl := fmt.Sprintf(StockListFormat, page, size)
+	qUrl := fmt.Sprintf(StockListFormat, page, size, listType)
 	respBody, err := x.requestXueqiu(qUrl)
 	if err != nil {
 		return StockList{}, err

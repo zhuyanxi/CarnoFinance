@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/cookiejar"
 )
 
 const (
@@ -23,11 +24,16 @@ type XueQiu struct {
 
 func New() *XueQiu {
 	xq := new(XueQiu)
-	client := &http.Client{}
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		panic(err)
+	}
+	client := &http.Client{Jar: jar}
 
 	xq.hc = client
-	// xq.token = xq.getToken()
-	xq.cookie = xqcookie
+	if err := xq.primeSession(); err != nil {
+		xq.cookie = xqcookie
+	}
 
 	// go func() {
 	// 	for {
@@ -47,6 +53,25 @@ func New() *XueQiu {
 	// }
 
 	return xq
+}
+
+func (x *XueQiu) primeSession() error {
+	req, err := http.NewRequest(http.MethodGet, XueQiuHost, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("User-Agent", UserAgent)
+
+	resp, err := x.hc.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	_, _ = io.Copy(io.Discard, resp.Body)
+	if resp.StatusCode >= http.StatusBadRequest {
+		return fmt.Errorf("prime xueqiu session: %s", resp.Status)
+	}
+	return nil
 }
 
 func (x *XueQiu) getToken() string {
@@ -83,8 +108,12 @@ func (x *XueQiu) requestXueqiu(qUrl string) ([]byte, error) {
 	}
 
 	req.Header.Set("User-Agent", UserAgent)
+	req.Header.Set("Referer", XueQiuHost)
+	req.Header.Set("Accept", "application/json, text/plain, */*")
 	// req.Header.Set("Cookie", fmt.Sprintf("u=%s;%s=%s;", UserId, TokenName, x.token))
-	req.Header.Set("Cookie", x.cookie)
+	if x.cookie != "" {
+		req.Header.Set("Cookie", x.cookie)
+	}
 
 	resp, err := x.hc.Do(req)
 	if err != nil {

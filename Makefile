@@ -1,7 +1,10 @@
-.PHONY: dev build
+.PHONY: dev build import-ashare-yahoo
 
 dev:
 	@echo "Running in development mode..."
 	# Insert development mode commands here
 	# e.g., start watchers, servers, or run tests
 	@cd ui && npm run build && cd ../cmd && go run main.go
+
+import-ashare-yahoo:
+	@go run ./cmd/yahooimport
