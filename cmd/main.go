@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -31,21 +33,38 @@ func main() {
 
 	ctx := context.Background()
 	sqlite := db.NewSqlite(ctx)
+	optionTrackSqlite := db.NewOptionTrackSqlite(ctx)
 	xqc := xueqiu.New()
 	app := domain.NewDomain(ctx, sqlite, xqc)
+	optionTrackApp := domain.NewOptionTrackService(ctx, optionTrackSqlite)
 
 	// logrus.Infof("Total profit for SH518880: %f", app.CalcGoldETFTotalProfit())
 	app.Init()
+	if err := optionTrackApp.Init(); err != nil {
+		panic(err)
+	}
 
 	r := gin.Default()
-	// CORS for http://localhost:5173 origins
-	// - Origin header
-	// - Credentials share
-	// - Preflight requests cached for 12 hours
+	// Allow local UI dev servers to call backend with JSON requests.
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:  []string{"http://localhost:5173"},
+		AllowOriginFunc: func(origin string) bool {
+			parsed, err := url.Parse(origin)
+			if err != nil {
+				return false
+			}
+
+			host := parsed.Hostname()
+			if parsed.Scheme != "http" {
+				return false
+			}
+			if parsed.Port() != "5173" {
+				return false
+			}
+
+			return host == "localhost" || host == "127.0.0.1" || host == "::1" || strings.EqualFold(host, "[::1]")
+		},
 		AllowMethods:  []string{"PUT", "PATCH", "GET", "POST", "DELETE"},
-		AllowHeaders:  []string{"Origin"},
+		AllowHeaders:  []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders: []string{"Content-Length"},
 		// AllowCredentials: true,
 		// AllowOriginFunc: func(origin string) bool {
@@ -79,6 +98,16 @@ func main() {
 	r.GET("/etf/rsrslist", api.GetRSRSList(app))
 	r.GET("/etf/:code/close", api.GetETFClosePrices(app))
 	r.GET("/etf/:code/HighGreaterThanOpen", api.GetETFHighGreaterThanOpen(app))
+
+	r.POST("/optiontrack/plans", api.CreateOptionTrackPlan(optionTrackApp))
+	r.GET("/optiontrack/plans", api.ListOptionTrackPlans(optionTrackApp))
+	r.GET("/optiontrack/plans/:id", api.GetOptionTrackPlanDetail(optionTrackApp))
+	r.POST("/optiontrack/plans/:id/trades", api.CreateOptionTrackTrade(optionTrackApp))
+	r.PUT("/optiontrack/plans/:id/trades/:tradeId", api.UpdateOptionTrackTrade(optionTrackApp))
+	r.DELETE("/optiontrack/plans/:id/trades/:tradeId", api.DeleteOptionTrackTrade(optionTrackApp))
+	r.POST("/optiontrack/plans/:id/close", api.CloseOptionTrackPlan(optionTrackApp))
+	r.GET("/optiontrack/plans/:id/pnl", api.GetOptionTrackPnL(optionTrackApp))
+	r.POST("/optiontrack/plans/:id/pnl/preview", api.PreviewOptionTrackPnL(optionTrackApp))
 
 	r.Run(":8080") // listen and serve on 0.0.0.0:8080
 }

@@ -34,6 +34,13 @@
 				<BadgeDollarSign />
 				<span>OptionMargin</span>
 			</a>
+			<a
+				href="/optiontrack"
+				class={page.url.pathname.startsWith('/optiontrack') ? activePath : nonActivePath}
+			>
+				<BadgeDollarSign />
+				<span>OptionTrack</span>
+			</a>
 			<a href="#top" class={page.url.pathname === '/settings' ? activePath : nonActivePath}>
 				<Settings color="#ffffff" strokeWidth={1} />
 				<span>Settings</span>
