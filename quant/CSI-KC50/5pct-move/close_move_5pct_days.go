@@ -1,0 +1,344 @@
+package main
+
+import (
+	"encoding/csv"
+	"fmt"
+	"io"
+	"math"
+	"os"
+	"path/filepath"
+	"runtime"
+	"sort"
+	"strconv"
+	"time"
+)
+
+const (
+	inputFileName   = "kc50_daily.csv"
+	outputFileName  = "kc50_close_move_5pct_natural_days.csv"
+	summaryFileName = "kc50_close_move_5pct_summary.md"
+	bucketFileName  = "kc50_close_move_5pct_bucket_distribution.csv"
+	dateLayout      = "2006-01-02"
+	moveThreshold   = 0.05
+	bucketSizeDays  = 10
+)
+
+type dailyClose struct {
+	TradeDate time.Time
+	Close     float64
+}
+
+type moveResult struct {
+	NaturalDays int
+	BreachDate  time.Time
+	BreachClose float64
+	HasBreach   bool
+}
+
+type bucketRow struct {
+	Label      string
+	StartDay   int
+	EndDay     int
+	Count      int
+	Percentage float64
+}
+
+func main() {
+	baseDir, err := resolveBaseDir()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "resolve base dir: %v\n", err)
+		os.Exit(1)
+	}
+
+	series, err := readDailyClose(filepath.Join(baseDir, "..", "total", inputFileName))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "read daily close csv: %v\n", err)
+		os.Exit(1)
+	}
+
+	results := computeFirstMoveDays(series)
+	outputPath := filepath.Join(baseDir, outputFileName)
+	if err := writeResults(outputPath, series, results); err != nil {
+		fmt.Fprintf(os.Stderr, "write result csv: %v\n", err)
+		os.Exit(1)
+	}
+
+	summaryPath := filepath.Join(baseDir, summaryFileName)
+	if err := writeSummary(summaryPath, results); err != nil {
+		fmt.Fprintf(os.Stderr, "write summary file: %v\n", err)
+		os.Exit(1)
+	}
+
+	bucketPath := filepath.Join(baseDir, bucketFileName)
+	if err := writeBucketDistribution(bucketPath, results); err != nil {
+		fmt.Fprintf(os.Stderr, "write bucket file: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("saved %d rows to %s, %s, and %s\n", len(results), outputPath, summaryPath, bucketPath)
+}
+
+func resolveBaseDir() (string, error) {
+	_, currentFile, _, ok := runtime.Caller(0)
+	if !ok {
+		return "", fmt.Errorf("cannot resolve current file path")
+	}
+	return filepath.Dir(currentFile), nil
+}
+
+func readDailyClose(path string) ([]dailyClose, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+	if _, err := reader.Read(); err != nil {
+		return nil, err
+	}
+
+	series := make([]dailyClose, 0, 2048)
+	for {
+		record, err := reader.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+		if len(record) < 5 {
+			return nil, fmt.Errorf("unexpected record length: %d", len(record))
+		}
+
+		tradeDate, err := time.Parse(dateLayout, record[0])
+		if err != nil {
+			return nil, fmt.Errorf("parse trade date %q: %w", record[0], err)
+		}
+		closePrice, err := strconv.ParseFloat(record[4], 64)
+		if err != nil {
+			return nil, fmt.Errorf("parse close %q: %w", record[4], err)
+		}
+
+		series = append(series, dailyClose{TradeDate: tradeDate, Close: closePrice})
+	}
+
+	return series, nil
+}
+
+func computeFirstMoveDays(series []dailyClose) []moveResult {
+	results := make([]moveResult, len(series))
+	for i := range results {
+		upperBound := series[i].Close * (1 + moveThreshold)
+		lowerBound := series[i].Close * (1 - moveThreshold)
+		for j := i + 1; j < len(series); j++ {
+			if series[j].Close > upperBound || series[j].Close < lowerBound {
+				results[i] = moveResult{
+					NaturalDays: int(series[j].TradeDate.Sub(series[i].TradeDate).Hours()/24) + 1,
+					BreachDate:  series[j].TradeDate,
+					BreachClose: series[j].Close,
+					HasBreach:   true,
+				}
+				break
+			}
+		}
+	}
+	return results
+}
+
+func writeResults(path string, series []dailyClose, results []moveResult) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	if err := writer.Write([]string{"trade_date", "natural_days_to_5pct_close_move", "breach_date", "breach_close"}); err != nil {
+		return err
+	}
+
+	for i, item := range series {
+		naturalDays := ""
+		breachDate := ""
+		breachClose := ""
+		if results[i].HasBreach {
+			naturalDays = strconv.Itoa(results[i].NaturalDays)
+			breachDate = results[i].BreachDate.Format(dateLayout)
+			breachClose = strconv.FormatFloat(results[i].BreachClose, 'f', 2, 64)
+		}
+		if err := writer.Write([]string{item.TradeDate.Format(dateLayout), naturalDays, breachDate, breachClose}); err != nil {
+			return err
+		}
+	}
+
+	return writer.Error()
+}
+
+func writeSummary(path string, results []moveResult) error {
+	values := make([]float64, 0, len(results))
+	missingCount := 0
+	for _, result := range results {
+		if !result.HasBreach {
+			missingCount++
+			continue
+		}
+		values = append(values, float64(result.NaturalDays))
+	}
+
+	sort.Float64s(values)
+
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	if len(values) == 0 {
+		_, err = fmt.Fprintln(file, "No breach rows found.")
+		return err
+	}
+
+	buckets := buildBucketDistribution(results)
+	lines := []string{
+		"# KC50 Close 5% Move Summary",
+		"",
+		fmt.Sprintf("- sample_with_breach: %d", len(values)),
+		fmt.Sprintf("- sample_without_breach: %d", missingCount),
+		fmt.Sprintf("- mean_days: %.2f", mean(values)),
+		fmt.Sprintf("- median_days: %.2f", percentile(values, 0.50)),
+		fmt.Sprintf("- p10_days: %.2f", percentile(values, 0.10)),
+		fmt.Sprintf("- p25_days: %.2f", percentile(values, 0.25)),
+		fmt.Sprintf("- p75_days: %.2f", percentile(values, 0.75)),
+		fmt.Sprintf("- p90_days: %.2f", percentile(values, 0.90)),
+		fmt.Sprintf("- p95_days: %.2f", percentile(values, 0.95)),
+		fmt.Sprintf("- min_days: %.0f", values[0]),
+		fmt.Sprintf("- max_days: %.0f", values[len(values)-1]),
+		"",
+		"## Bucket Distribution",
+		"",
+		"| bucket | start_day | end_day | count | percentage |",
+		"| --- | ---: | ---: | ---: | ---: |",
+	}
+
+	for _, bucket := range buckets {
+		startDay := ""
+		endDay := ""
+		if bucket.StartDay > 0 {
+			startDay = strconv.Itoa(bucket.StartDay)
+		}
+		if bucket.EndDay > 0 {
+			endDay = strconv.Itoa(bucket.EndDay)
+		}
+		lines = append(lines, fmt.Sprintf("| %s | %s | %s | %d | %.2f%% |", bucket.Label, startDay, endDay, bucket.Count, bucket.Percentage))
+	}
+
+	for _, line := range lines {
+		if _, err := fmt.Fprintln(file, line); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func writeBucketDistribution(path string, results []moveResult) error {
+	buckets := buildBucketDistribution(results)
+
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	if err := writer.Write([]string{"bucket", "start_day", "end_day", "count", "percentage"}); err != nil {
+		return err
+	}
+
+	for _, bucket := range buckets {
+		startDay := ""
+		endDay := ""
+		if bucket.StartDay > 0 {
+			startDay = strconv.Itoa(bucket.StartDay)
+		}
+		if bucket.EndDay > 0 {
+			endDay = strconv.Itoa(bucket.EndDay)
+		}
+		if err := writer.Write([]string{bucket.Label, startDay, endDay, strconv.Itoa(bucket.Count), fmt.Sprintf("%.4f", bucket.Percentage)}); err != nil {
+			return err
+		}
+	}
+
+	return writer.Error()
+}
+
+func buildBucketDistribution(results []moveResult) []bucketRow {
+	maxDays := 0
+	missingCount := 0
+	for _, result := range results {
+		if !result.HasBreach {
+			missingCount++
+			continue
+		}
+		if result.NaturalDays > maxDays {
+			maxDays = result.NaturalDays
+		}
+	}
+
+	bucketCount := 0
+	if maxDays > 0 {
+		bucketCount = (maxDays + bucketSizeDays - 1) / bucketSizeDays
+	}
+	buckets := make([]bucketRow, 0, bucketCount+1)
+	for idx := 0; idx < bucketCount; idx++ {
+		startDay := idx*bucketSizeDays + 1
+		endDay := (idx + 1) * bucketSizeDays
+		buckets = append(buckets, bucketRow{Label: fmt.Sprintf("%d-%d", startDay, endDay), StartDay: startDay, EndDay: endDay})
+	}
+
+	for _, result := range results {
+		if !result.HasBreach {
+			continue
+		}
+		bucketIndex := (result.NaturalDays - 1) / bucketSizeDays
+		buckets[bucketIndex].Count++
+	}
+
+	total := float64(len(results))
+	for idx := range buckets {
+		buckets[idx].Percentage = float64(buckets[idx].Count) / total * 100
+	}
+
+	if missingCount > 0 {
+		buckets = append(buckets, bucketRow{Label: "no_breach_yet", Count: missingCount, Percentage: float64(missingCount) / total * 100})
+	}
+
+	return buckets
+}
+
+func mean(values []float64) float64 {
+	sum := 0.0
+	for _, value := range values {
+		sum += value
+	}
+	return sum / float64(len(values))
+}
+
+func percentile(values []float64, p float64) float64 {
+	if len(values) == 1 {
+		return values[0]
+	}
+	position := p * float64(len(values)-1)
+	lower := int(math.Floor(position))
+	upper := int(math.Ceil(position))
+	if lower == upper {
+		return values[lower]
+	}
+	weight := position - float64(lower)
+	return values[lower] + (values[upper]-values[lower])*weight
+}
