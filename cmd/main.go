@@ -14,7 +14,6 @@ import (
 	"github.com/zhuyanxi/CarnoFinance/pkg/db"
 	"github.com/zhuyanxi/CarnoFinance/pkg/domain"
 	"github.com/zhuyanxi/CarnoFinance/pkg/helper"
-	"github.com/zhuyanxi/CarnoFinance/pkg/xueqiu"
 )
 
 // curl --location 'http://localhost:8080/etf/rsrslist?period=25&date=20240705'
@@ -34,8 +33,7 @@ func main() {
 	ctx := context.Background()
 	sqlite := db.NewSqlite(ctx)
 	optionTrackSqlite := db.NewOptionTrackSqlite(ctx)
-	xqc := xueqiu.New()
-	app := domain.NewDomain(ctx, sqlite, xqc)
+	app := domain.NewDomain(ctx, sqlite)
 	optionTrackApp := domain.NewOptionTrackService(ctx, optionTrackSqlite)
 
 	// logrus.Infof("Total profit for SH518880: %f", app.CalcGoldETFTotalProfit())
@@ -94,7 +92,6 @@ func main() {
 		helper.GinOK(ctx)
 	})
 
-	r.POST("/etf/last", api.SetETFPrice(app))
 	r.GET("/etf/rsrslist", api.GetRSRSList(app))
 	r.GET("/etf/:code/close", api.GetETFClosePrices(app))
 	r.GET("/etf/:code/HighGreaterThanOpen", api.GetETFHighGreaterThanOpen(app))

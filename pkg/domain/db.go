@@ -5,20 +5,19 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/uptrace/bun"
-	"github.com/zhuyanxi/CarnoFinance/pkg/xueqiu"
 )
 
 type Domain struct {
 	ctx context.Context
 	db  *bun.DB
-	xqc *xueqiu.XueQiu
+	// xqc *xueqiu.XueQiu
 }
 
-func NewDomain(ctx context.Context, db *bun.DB, xqc *xueqiu.XueQiu) *Domain {
+func NewDomain(ctx context.Context, db *bun.DB) *Domain {
 	return &Domain{
 		ctx: ctx,
 		db:  db,
-		xqc: xqc,
+		// xqc: xqc,
 	}
 }
 
@@ -31,7 +30,4 @@ func (d *Domain) Init() {
 	logrus.Errorf("%+v", err)
 	_, err = d.db.NewCreateTable().Model((*ETFCodeList)(nil)).Exec(d.ctx)
 	logrus.Errorf("%+v", err)
-
-	d.InitLastOneDayETFPrice()
-	// d.InitStockList()
 }

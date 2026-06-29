@@ -1,11 +1,5 @@
 package xueqiu
 
-import (
-	"encoding/json"
-	"fmt"
-	"time"
-)
-
 // https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol=SH601888&begin=1725454058238&period=day&type=before&count=-284&indicator=kline,pe,pb,ps,pcf,market_capital,agt,ggt,balance
 const KLineFormat = "https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol=%s&begin=%d&period=%s&type=%s&count=%d"
 
@@ -45,21 +39,21 @@ type KLineQuery struct {
 }
 
 // https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol=SH601888&begin=1725454058238&period=day&type=before&count=-284&indicator=kline,pe,pb,ps,pcf,market_capital,agt,ggt,balance
-func (x *XueQiu) GetKline(q KLineQuery) (KLine, error) {
-	// if x.token == "" {
-	// 	return KLine{}, fmt.Errorf("token is empty")
-	// }
+// func (x *XueQiu) GetKline(q KLineQuery) (KLine, error) {
+// 	// if x.token == "" {
+// 	// 	return KLine{}, fmt.Errorf("token is empty")
+// 	// }
 
-	qUrl := fmt.Sprintf(KLineFormat, q.Symbol, time.Now().UnixMilli(), q.Period, q.Type, q.Count)
-	respBody, err := x.requestXueqiu(qUrl)
-	if err != nil {
-		return KLine{}, err
-	}
+// 	qUrl := fmt.Sprintf(KLineFormat, q.Symbol, time.Now().UnixMilli(), q.Period, q.Type, q.Count)
+// 	respBody, err := x.requestXueqiu(qUrl)
+// 	if err != nil {
+// 		return KLine{}, err
+// 	}
 
-	var kline KLine
-	if err := json.Unmarshal(respBody, &kline); err != nil {
-		return KLine{}, err
-	}
+// 	var kline KLine
+// 	if err := json.Unmarshal(respBody, &kline); err != nil {
+// 		return KLine{}, err
+// 	}
 
-	return kline, nil
-}
+// 	return kline, nil
+// }

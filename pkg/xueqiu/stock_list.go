@@ -1,10 +1,5 @@
 package xueqiu
 
-import (
-	"encoding/json"
-	"fmt"
-)
-
 const (
 	DefaultStockListType = "sh_sz"
 	StockListFormat      = "https://stock.xueqiu.com/v5/stock/screener/quote/list.json?page=%d&size=%d&order=desc&order_by=market_capital&market=CN&type=%s"
@@ -24,27 +19,27 @@ type StockListItem struct {
 	Name   string `json:"name,omitempty"`
 }
 
-func (x *XueQiu) GetStockList(page, size int) (StockList, error) {
-	return x.GetStockListByType(DefaultStockListType, page, size)
-}
+// func (x *XueQiu) GetStockList(page, size int) (StockList, error) {
+// 	return x.GetStockListByType(DefaultStockListType, page, size)
+// }
 
-func (x *XueQiu) GetStockListByType(listType string, page, size int) (StockList, error) {
-	// if x.token == "" {
-	// 	return StockList{}, fmt.Errorf("token is empty")
-	// }
-	if listType == "" {
-		listType = DefaultStockListType
-	}
+// func (x *XueQiu) GetStockListByType(listType string, page, size int) (StockList, error) {
+// 	// if x.token == "" {
+// 	// 	return StockList{}, fmt.Errorf("token is empty")
+// 	// }
+// 	if listType == "" {
+// 		listType = DefaultStockListType
+// 	}
 
-	qUrl := fmt.Sprintf(StockListFormat, page, size, listType)
-	respBody, err := x.requestXueqiu(qUrl)
-	if err != nil {
-		return StockList{}, err
-	}
+// 	qUrl := fmt.Sprintf(StockListFormat, page, size, listType)
+// 	respBody, err := x.requestXueqiu(qUrl)
+// 	if err != nil {
+// 		return StockList{}, err
+// 	}
 
-	var stockList StockList
-	if err := json.Unmarshal(respBody, &stockList); err != nil {
-		return StockList{}, err
-	}
-	return stockList, nil
-}
+// 	var stockList StockList
+// 	if err := json.Unmarshal(respBody, &stockList); err != nil {
+// 		return StockList{}, err
+// 	}
+// 	return stockList, nil
+// }
