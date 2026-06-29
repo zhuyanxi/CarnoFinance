@@ -7,3 +7,5 @@
 
 all-stock.db
 cmd/r2upload/r2upload
+
+__pycache__/

@@ -1,7 +1,7 @@
 import sqlite3
 import pandas as pd
 import akshare as ak
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 
 # 配置日志或打印格式
@@ -193,8 +193,9 @@ if __name__ == "__main__":
     init_db(db_file)
     
     # 2. 设定起止日期参数
-    start = "20260601"
-    end = "20260629"
+    today = datetime.now()
+    end = today.strftime('%Y%m%d')
+    start = (today - timedelta(days=4)).strftime('%Y%m%d')
     
     log(f"Starting pipeline. Target database: {db_file}")
     
