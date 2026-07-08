@@ -220,7 +220,7 @@ if __name__ == "__main__":
     today = datetime.now()
     # end = today.strftime('%Y-%m-%d')
     end = (today + timedelta(days=1)).strftime('%Y-%m-%d')
-    start = (today - timedelta(days=10)).strftime('%Y-%m-%d')
+    start = (today - timedelta(days=30)).strftime('%Y-%m-%d')
 
     log(f"Starting pipeline. Target database: {db_file}, start: {start}, end: {end}")
 
