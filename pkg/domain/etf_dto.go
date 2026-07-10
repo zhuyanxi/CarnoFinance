@@ -33,6 +33,7 @@ func (d *Domain) GetETFRSRSList(period int, order, date string) ([]RSRSDto, erro
 
 		reversePrice := lo.Reverse(pricesList)
 		score := helper.RSRS(reversePrice)
+		// score := kalmanfilter.RSRS(reversePrice)
 		rets = append(rets, RSRSDto{
 			TsCode: etf.TSCode,
 			Name:   etf.Name,
