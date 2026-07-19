@@ -4,6 +4,8 @@ import yfinance as yf
 from datetime import datetime, timedelta
 import os
 
+etfs = ["SZ159915", "SH515100", "SH513100", "SH518880", "SH510050"]
+
 # 配置日志或打印格式
 def log(message: str):
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}")
@@ -73,7 +75,7 @@ def fetch_and_save_etf_data(
     :param end_date: 结束日期，格式为 'YYYY-MM-DD'
     :param db_path: SQLite 数据库文件路径
     """
-    etfs = ["SZ159915", "SH515100", "SH513100", "SH518880"]
+    # etfs = ["SZ159915", "SH515100", "SH513100", "SH518880"]
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     total_records_inserted = 0
@@ -146,7 +148,7 @@ def fetch_and_save_etf_min_data(
     :param period: 级别。可选 '1m', '5m', '15m', '30m', '60m'
     :param db_path: SQLite 数据库文件路径
     """
-    etfs = ["SZ159915", "SH515100", "SH513100", "SH518880"]
+    # etfs = ["SZ159915", "SH515100", "SH513100", "SH518880"]
 
     # yfinance interval 参数映射
     interval_map = {
@@ -220,7 +222,7 @@ if __name__ == "__main__":
     today = datetime.now()
     # end = today.strftime('%Y-%m-%d')
     end = (today + timedelta(days=1)).strftime('%Y-%m-%d')
-    start = (today - timedelta(days=30)).strftime('%Y-%m-%d')
+    start = (today - timedelta(days=60)).strftime('%Y-%m-%d')
 
     log(f"Starting pipeline. Target database: {db_file}, start: {start}, end: {end}")
 
