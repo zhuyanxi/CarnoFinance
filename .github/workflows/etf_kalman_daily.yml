@@ -42,3 +42,22 @@ jobs:
             git commit -m "chore: update etf kalman score report [skip ci]"
             git push
           fi
+
+      - name: Mirror to zhuyanxi.github.io
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          TARGET_REPO="https://x-access-token:${GH_PAT}@github.com/zhuyanxi/zhuyanxi.github.io.git"
+          git clone --depth 1 "$TARGET_REPO" /tmp/zhuyanxi-pages
+          mkdir -p /tmp/zhuyanxi-pages/etfscore
+          cp data/etf_kalman_score.html /tmp/zhuyanxi-pages/etfscore/index.html
+          cd /tmp/zhuyanxi-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add etfscore/index.html
+          if git diff --cached --quiet; then
+            echo "No change, skip mirror push."
+          else
+            git commit -m "chore: sync etf kalman score from CarnoFinance"
+            git push
+          fi
