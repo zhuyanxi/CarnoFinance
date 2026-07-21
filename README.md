@@ -28,19 +28,3 @@ download_etf.py  →  get_kalmanfilter_score.py  →  提交 HTML →  镜像推
 3. **提交 HTML 报告** — 将 `data/etf_kalman_score.html` 推回本仓库 `main` 分支。
 
 4. **镜像到 zhuyanxi.github.io** — 将 HTML 报告复制为 `etfscore/index.html`，推送到 `zhuyanxi/zhuyanxi.github.io`，可通过 `https://zhuyanxi.github.io/etfscore/` 直接访问。
-
-### 所需 Secrets
-
-在仓库 `Settings → Secrets and variables → Actions` 中配置：
-
-| Secret | 说明 |
-|---|---|
-| `GH_PAT` | GitHub Personal Access Token，需对 `zhuyanxi/zhuyanxi.github.io` 有 Contents 写权限。仅镜像推送步骤需要，不配置则跳过镜像。 |
-
-### 创建 PAT 步骤
-
-1. GitHub 头像 → **Settings** → **Developer settings** → **Personal access tokens** → **Fine-grained tokens**
-2. 点击 **Generate new token**
-3. Repository access：选择 **Only select repositories** → 选 `zhuyanxi/zhuyanxi.github.io`
-4. Permissions：**Contents** → **Read and write**
-5. 生成后复制 token，粘贴到本仓库的 Secrets 中，命名为 `GH_PAT`
