@@ -1,0 +1,44 @@
+name: ETF Kalman Filter Daily Score
+
+on:
+  schedule:
+    # 每天北京时间 18:00 (UTC+8) = UTC 10:00
+    - cron: "0 10 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  etf-score:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write # auto-commit 需要写权限
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run download_etf.py
+        run: python cmd/download_etf.py
+
+      - name: Run get_kalmanfilter_score.py
+        run: python cmd/get_kalmanfilter_score.py
+
+      - name: Commit & push HTML report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/etf_kalman_score.html
+          if git diff --cached --quiet; then
+            echo "No change, skip commit."
+          else
+            git commit -m "chore: update etf kalman score report [skip ci]"
+            git push
+          fi

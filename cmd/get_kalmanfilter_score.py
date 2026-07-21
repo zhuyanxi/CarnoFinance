@@ -1,5 +1,6 @@
 import argparse
 import math
+import os
 import sqlite3
 from datetime import datetime
 
@@ -177,6 +178,91 @@ def get_rank(conn, end_date=None):
 
 
 # -----------------------------
+# HTML 导出
+# -----------------------------
+def export_html(result: pd.DataFrame, end_date: str | None, out_dir: str = "data") -> str:
+    """生成静态 HTML 报告，返回输出文件路径。"""
+
+    os.makedirs(out_dir, exist_ok=True)
+    out_path = os.path.join(out_dir, "etf_kalman_score.html")
+
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+    title = f"ETF 卡尔曼滤波评分 — {end_date or '最新'} ({now_str})"
+
+    # 给 Score 加颜色：正绿负红
+    def score_td(score: float) -> str:
+        color = "#16a34a" if score >= 0 else "#dc2626"
+        pct = f"{score * 100:.2f}%"
+        return f'<td style="color:{color};font-weight:600">{pct}</td>'
+
+    rows_html = ""
+    for _, row in result.iterrows():
+        slope = row["Slope"]
+        slope_bp = f"{slope * 10000:.1f} bp"
+        rows_html += f"""<tr>
+            <td>{row['ETF']}</td>
+            <td>{slope:.6f}</td>
+            <td>{slope_bp}</td>
+            <td>{row['Variance']:.6e}</td>
+            {score_td(row['Score'])}
+        </tr>"""
+
+    html = f"""<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{title}</title>
+<style>
+  * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+  body {{
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f5f5f5; color: #1e1e1e; padding: 24px;
+  }}
+  .card {{
+    max-width: 720px; margin: 0 auto; background: #fff;
+    border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 32px;
+  }}
+  h1 {{ font-size: 20px; margin-bottom: 8px; }}
+  .sub {{ color: #888; font-size: 13px; margin-bottom: 24px; }}
+  table {{ width: 100%; border-collapse: collapse; }}
+  th, td {{ padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; }}
+  th {{ font-size: 12px; color: #888; text-transform: uppercase; }}
+  td {{ font-size: 14px; font-variant-numeric: tabular-nums; }}
+  tr:last-child td {{ border-bottom: none; }}
+  .footer {{ margin-top: 24px; font-size: 12px; color: #aaa; text-align: center; }}
+  .footer a {{ color: #888; }}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>📊 ETF 卡尔曼滤波评分</h1>
+  <p class="sub">截止日期: {end_date or '最新'} &nbsp;|&nbsp; 生成时间: {now_str}
+     &nbsp;|&nbsp; 参数: M={M_DAYS} Q={Q_NOISE} R={R_NOISE}</p>
+  <table>
+    <thead>
+      <tr><th>ETF</th><th>Slope</th><th>年化斜率</th><th>Variance</th><th>Score</th></tr>
+    </thead>
+    <tbody>
+      {rows_html}
+    </tbody>
+  </table>
+  <p class="footer">
+    ⚠️ 历史数据回测，不构成投资建议 &nbsp;|&nbsp; 数据源: Yahoo Finance &nbsp;|&nbsp; 算法: Kalman Filter
+  </p>
+</div>
+</body>
+</html>"""
+
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write(html)
+
+    print(f"\nHTML 报告已保存至: {out_path}")
+    return out_path
+
+
+# -----------------------------
 # 主程序
 # -----------------------------
 if __name__ == "__main__":
@@ -194,7 +280,6 @@ if __name__ == "__main__":
 
     end_date = args.end_date
     if end_date is not None:
-        # 校验格式
         try:
             datetime.strptime(end_date, "%Y%m%d")
         except ValueError:
@@ -206,5 +291,7 @@ if __name__ == "__main__":
 
     print(f"end_date = {end_date or '最新'}")
     print(result)
+
+    export_html(result, end_date)
 
     conn.close()
