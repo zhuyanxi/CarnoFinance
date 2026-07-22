@@ -2,7 +2,7 @@ import argparse
 import math
 import os
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 import numpy as np
 import pandas as pd
@@ -186,7 +186,7 @@ def export_html(result: pd.DataFrame, end_date: str | None, out_dir: str = "data
     os.makedirs(out_dir, exist_ok=True)
     out_path = os.path.join(out_dir, "etf_kalman_score.html")
 
-    now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+    now_str = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M")
     title = f"ETF 卡尔曼滤波评分 — {end_date or '最新'} ({now_str})"
 
     # 给 Score 加颜色：正绿负红
@@ -238,7 +238,7 @@ def export_html(result: pd.DataFrame, end_date: str | None, out_dir: str = "data
 <body>
 <div class="card">
   <h1>📊 ETF 卡尔曼滤波评分</h1>
-  <p class="sub">截止日期: {end_date or '最新'} &nbsp;|&nbsp; 生成时间: {now_str}
+  <p class="sub">截止日期: {end_date or '最新'} &nbsp;|&nbsp; 生成时间: {now_str}(UTC+8)
      &nbsp;|&nbsp; 参数: M={M_DAYS} Q={Q_NOISE} R={R_NOISE}</p>
   <table>
     <thead>
