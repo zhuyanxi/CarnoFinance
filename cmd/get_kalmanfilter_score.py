@@ -192,7 +192,7 @@ def export_html(result: pd.DataFrame, end_date: str | None, out_dir: str = "data
     # 给 Score 加颜色：正绿负红
     def score_td(score: float) -> str:
         color = "#16a34a" if score >= 0 else "#dc2626"
-        pct = f"{score * 100:.2f}%"
+        pct = f"{score * 100:.4f}%"
         return f'<td style="color:{color};font-weight:600">{pct}</td>'
 
     rows_html = ""
