@@ -213,7 +213,7 @@ def fetch_and_save_etf_min_data(
 
 # 示例运行逻辑
 if __name__ == "__main__":
-    db_file = "finance.db"
+    db_file = "cmd/finance.db"
 
     # 1. 初始化数据库及表结构
     init_db(db_file)
