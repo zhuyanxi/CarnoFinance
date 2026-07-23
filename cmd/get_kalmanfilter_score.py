@@ -285,7 +285,7 @@ if __name__ == "__main__":
         except ValueError:
             parser.error(f"end-date 格式错误: '{end_date}'，应为 YYYYMMDD")
 
-    conn = sqlite3.connect("finance.db")
+    conn = sqlite3.connect("cmd/finance.db")
 
     result = get_rank(conn, end_date=end_date)
 
