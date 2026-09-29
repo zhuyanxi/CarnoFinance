@@ -1,0 +1,52 @@
+{
+  "retrieved_at": "2026-09-29T14:21:50.073354+08:00",
+  "spot_quote_time": "2026-09-29T14:21:48+08:00",
+  "spot_name": "中证1000",
+  "spot_price": 7344.56,
+  "contracts": [
+    {
+      "contract": "IM2610",
+      "security_id": "8.151110",
+      "expiry_date": "2026-10-16",
+      "future_price": 7334.2,
+      "discount_points": 10.360000000000582,
+      "discount_rate_pct": 0.14105678216258813,
+      "daily_discount_points": 0.6094117647059166,
+      "annualized_discount_rate_pct": 3.02857208760851,
+      "days_to_expiry": 17
+    },
+    {
+      "contract": "IM2611",
+      "security_id": "8.151111",
+      "expiry_date": "2026-11-20",
+      "future_price": 7267.8,
+      "discount_points": 76.76000000000022,
+      "discount_rate_pct": 1.0451272778764176,
+      "daily_discount_points": 1.4761538461538504,
+      "annualized_discount_rate_pct": 7.335989546632547,
+      "days_to_expiry": 52
+    },
+    {
+      "contract": "IM2612",
+      "security_id": "8.151112",
+      "expiry_date": "2026-12-18",
+      "future_price": 7206.8,
+      "discount_points": 137.76000000000022,
+      "discount_rate_pct": 1.875673968215934,
+      "daily_discount_points": 1.7220000000000026,
+      "annualized_discount_rate_pct": 8.557762479985199,
+      "days_to_expiry": 80
+    },
+    {
+      "contract": "IM2703",
+      "security_id": "8.151103",
+      "expiry_date": "2027-03-19",
+      "future_price": 7024.8,
+      "discount_points": 319.7600000000002,
+      "discount_rate_pct": 4.353698519720721,
+      "daily_discount_points": 1.8699415204678376,
+      "annualized_discount_rate_pct": 9.29298222045651,
+      "days_to_expiry": 171
+    }
+  ]
+}
